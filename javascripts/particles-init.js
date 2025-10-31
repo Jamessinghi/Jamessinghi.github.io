@@ -1,66 +1,74 @@
-/* === Particles Background — MkDocs container-scoped version === */
+/* === Particles Background — robust init === */
+
 console.info('[particles] init file loaded');
-console.info('[particles] tsParticles present:', typeof tsParticles !== 'undefined');
 
-/* 1️⃣ Create the background layer inside MkDocs' main container */
-(function ensureParticlesLayer() {
-  // Prefer the Material theme's .md-container; fall back to <body> if missing
-  const root = document.querySelector('.md-container') || document.body;
-  if (!document.getElementById('particles-bg')) {
-    const el = document.createElement('div');
-    el.id = 'particles-bg';
-    root.prepend(el);
-  }
-})();
+function waitForTsParticles(retries = 20, delay = 200) {
+  return new Promise((resolve, reject) => {
+    const check = () => {
+      if (typeof tsParticles !== 'undefined' && typeof tsParticles.load === 'function') {
+        console.info('[particles] tsParticles READY');
+        resolve();
+      } else if (retries > 0) {
+        console.info('[particles] waiting for tsParticles…', { retries });
+        setTimeout(() => { retries--; check(); }, delay);
+      } else {
+        reject(new Error('tsParticles not found or not ready'));
+      }
+    };
+    check();
+  });
+}
 
-/* 2️⃣ Respect users who prefer reduced motion */
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (prefersReducedMotion) {
-  console.info('[particles] reduced motion: disabled');
-} else {
-  document.addEventListener('DOMContentLoaded', async () => {
-    const targetId = 'particles-bg';
-    const el = document.getElementById(targetId);
-    if (!el) return;
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await waitForTsParticles();
 
-    /* 3️⃣ Optional: adapt particle colors to system light/dark mode */
-    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const dot  = dark ? '#90caf9' : '#5c6bc0';
-    const line = dark ? '#42a5f5' : '#303f9f';
+    // Create/ensure the host layer
+    const root =
+      document.querySelector('.md-main') ||
+      document.querySelector('.md-container') ||
+      document.body;
 
-    /* 4️⃣ Initialize tsParticles */
-    await tsParticles.load(targetId, {
+    let host = document.getElementById('particles-bg');
+    if (!host) {
+      host = document.createElement('div');
+      host.id = 'particles-bg';
+      root.prepend(host);
+    }
+
+    // Accessibility: honor reduced motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      console.info('[particles] reduced motion: disabled');
+      return;
+    }
+
+    // Loud config so you can’t miss it — tune later
+    const container = await tsParticles.load('particles-bg', {
       fpsLimit: 60,
       background: { color: 'transparent' },
-      fullScreen: { enable: false }, // sizing handled via CSS (#particles-bg)
-
-      interactivity: {
-        detectsOn: 'window',
-        events: { onHover: { enable: true, mode: 'repulse' }, resize: true },
-        modes: { repulse: { distance: 100, duration: 0.4 } }
-      },
+      fullScreen: { enable: false },
 
       particles: {
-        number: { value: 60, density: { enable: true, area: 800 } },
-        color:  { value: dot },
+        number: { value: 180, density: { enable: true, area: 800 } },
+        color:  { value: '#ff1744' },       // bright
         shape:  { type: 'circle' },
-        opacity:{ value: 0.55 },
-        size:   { value: 2.8, random: { enable: true, minimumValue: 1.4 } },
-        links:  { enable: true, distance: 140, color: line, opacity: 0.75, width: 1 },
-        move:   {
-          enable: true,
-          speed: 0.6,
-          direction: 'none',
-          random: false,
-          straight: false,
-          outModes: { default: 'out' },
-          attract: { enable: false }
-        }
+        opacity:{ value: 1 },
+        size:   { value: 5 },               // large
+        links:  { enable: false },
+        move:   { enable: true, speed: 1.0, outModes: { default: 'out' } }
+      },
+
+      interactivity: {
+        events: { onHover: { enable: true, mode: 'repulse' }, resize: true },
+        modes: { repulse: { distance: 120, duration: 0.4 } }
       },
 
       detectRetina: true
     });
 
-    console.info('[particles] started');
-  });
-}
+    console.info('[particles] started. dom containers:', tsParticles.dom());
+    console.info('[particles] loaded container:', container);
+  } catch (e) {
+    console.error('[particles] failed to start:', e);
+  }
+});
