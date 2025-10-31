@@ -1,0 +1,22 @@
+# to install mckdocs and start your website use:
+#python -m pip install --upgrade pip
+#python -m pip install mkdocs mkdocs-material
+#python -m mkdocs new .
+#python -m mkdocs serve
+
+# Project Structure
+#portfolio-site/
+#├─ mkdocs.yml
+#├─ docs/
+#│  ├─ index.md
+#│  ├─ projects.md
+#│  ├─ resume.md
+#│  ├─ contact.md
+#│  ├─ assets/
+#│  │  └─ headshot.jpg  (optional placeholder)
+#│  └─ stylesheets/
+#│     └─ extra.css
+#└─ .github/
+#   └─ workflows/
+#      └─ gh-pages.yml
+

@@ -1,0 +1,94 @@
+# remember setup:
+# python -m mkdocs serve
+# python -m pip install pymdown-extensions
+
+
+site_name: James Singhi - Software Engineer and Financial Analyst
+# Allocate the site name/title of website
+site_url: https://Jamessinghi.github.io
+# Informs on site url
+site_description: "Discover my portfolio, current projects, Achievements, Career Progression, Interests"
+# visible in html metadata and potentially, under your site tile in google search results.copyright
+site_author: James Singhi
+#used for metadata
+
+theme:
+  name: material
+  # selects material for Mkdocs theme
+  features:
+    - navigation.tabs
+    #adds horizontal search tabs
+    - navigation.sections
+    # organises subpages in group sections in sidebar
+    - navigation.expand
+    # Sidebar menus start expanded
+    - search.suggest
+    # autocomplete searches
+    - search.highlight
+    # highlights search terms
+    - content.code.copy
+    # copy to clipboard button
+    - toc.integrate
+    # Displays the table of contents
+  icon:
+    logo: material/laptop
+    #This decides the logo in the top left corner
+  palette:
+    - scheme: default
+      #white mode background
+      primary: indigo
+      # primary colour
+      accent: indigo
+      # the colour that appears when an object is highlighted.
+
+repo_url: https://github.com/Jamessinghi/Jamessinghi.github.io
+repo_name: GitHub Link
+#adds a small link to the top right corner of the site
+
+nav:
+  - Home: index.md
+  - Projects: projects.md
+  - Resume: resume.md
+  - Contact: contact.md
+    #links each item (index, projects, resume, contact) to a file in markdown file (visible via navigation tabs)
+
+#advanced formatting options:
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+      #table of contents and link icons beside headings
+  - pymdownx.details
+  #collapsible click to expand sections
+  - pymdownx.superfences
+  # handles nested code blocks in a clean and efficient manner
+  - pymdownx.highlight
+  # syntax for highlighting code
+  - pymdownx.critic
+  #inline change tracking
+  - pymdownx.tabbed
+  # tabbed blocks
+  - attr_list
+  # enables the addition of CSS classes/attributes
+  - tables
+  # markdown tables
+  - def_list
+  # definition lists
+
+extra_css:
+  - stylesheets/extra.css
+  # loads personal stylesheets thus any custom tweaks added override the themes defaults
+plugins:
+  - search
+  # enables a built in search bar (magnifying-glass icon in the top right)
+extra:
+  meta:
+    - name: robots
+      content: noindex, nofollow
+      # tells google and bing not to index your site - ensures it is only accesible via direct link
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Jamessinghi
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/james-singhi/
+      #puts social links in the footer
