@@ -1,7 +1,7 @@
-/* Make the site wrapper a stacking context */
+/* Container-scoped particles */
 .md-container { position: relative; }
 
-/* Particle layer fills the container, sits behind content */
+/* Particle layer behind content */
 #particles-bg {
   position: absolute;
   inset: 0;
@@ -10,16 +10,22 @@
 }
 
 /* Keep all content above particles and transparent */
+html, body,
+.md-container,
 .md-main,
 .md-main__inner,
 .md-content,
+.md-content__inner,
 .md-typeset {
+  background: transparent !important;
   position: relative;
   z-index: 1;
-  background: transparent !important;
 }
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   #particles-bg { display: none; }
 }
+
+/* TEMP DEBUG — uncomment to verify layer is visible, then remove */
+/* #particles-bg { background: rgba(255,0,0,.05) !important; } */
