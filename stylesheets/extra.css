@@ -33,3 +33,20 @@
 h1, h2, h3 {
   text-align: center;
 }
+/* === Force top navigation tabs to always show === */
+@media screen and (max-width: 1220px) {
+  .md-tabs {
+    display: flex !important;           /* Keep showing the tabs */
+    overflow-x: auto;                   /* Scroll if too many tabs */
+    white-space: nowrap;
+  }
+
+  .md-header__inner {
+    flex-wrap: wrap;                    /* Prevent layout breaking */
+  }
+
+  .md-tabs__link {
+    font-size: 0.85rem;                 /* Slightly smaller text on narrow screens */
+    padding: 0.5em 1em;
+  }
+}
