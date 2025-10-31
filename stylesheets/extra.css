@@ -1,3 +1,29 @@
 .md-typeset h1 {
   font-weight: 800;
 }
+
+/* === Particle background layer === */
+#particles-bg {
+  position: fixed;     /* Sticks to the viewport */
+  inset: 0;            /* top/right/bottom/left: 0 (full screen) */
+  z-index: 0;          /* Behind the main content */
+  pointer-events: none;/* Don't block clicks or text selection */
+}
+
+/* Make sure the main content sits above the background */
+.md-container,
+.md-main,
+.md-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  #particles-bg { display: none; }
+}
+/* this builds a full screen layer pinned to the viewport
+/*it sits behind the site content
+/* **pointer events** ensure your mouse interacts with your page not the canvas
+/*  md- rules ensure mckdocs material content stays above the background
+/* media query allows people to turn it off */
