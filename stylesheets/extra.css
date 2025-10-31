@@ -1,29 +1,25 @@
-.md-typeset h1 {
-  font-weight: 800;
-}
+/* Make the site wrapper a stacking context */
+.md-container { position: relative; }
 
-/* === Particle background layer === */
+/* Particle layer fills the container, sits behind content */
 #particles-bg {
-  position: fixed;     /* Sticks to the viewport */
-  inset: 0;            /* top/right/bottom/left: 0 (full screen) */
-  z-index: 0;          /* Behind the main content */
-  pointer-events: none;/* Don't block clicks or text selection */
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
-/* Make sure the main content sits above the background */
-.md-container,
+/* Keep all content above particles and transparent */
 .md-main,
-.md-content {
+.md-main__inner,
+.md-content,
+.md-typeset {
   position: relative;
   z-index: 1;
+  background: transparent !important;
 }
 
-/* Respect users who prefer reduced motion */
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   #particles-bg { display: none; }
 }
-/* this builds a full screen layer pinned to the viewport
-/*it sits behind the site content
-/* **pointer events** ensure your mouse interacts with your page not the canvas
-/*  md- rules ensure mckdocs material content stays above the background
-/* media query allows people to turn it off */

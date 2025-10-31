@@ -1,73 +1,64 @@
+/* === Particles Background — MkDocs container-scoped version === */
 console.info('[particles] init file loaded');
 console.info('[particles] tsParticles present:', typeof tsParticles !== 'undefined');
-// Create the background layer automatically on every page
+
+/* 1️⃣ Create the background layer inside MkDocs' main container */
 (function ensureParticlesLayer() {
+  // Prefer the Material theme's .md-container; fall back to <body> if missing
+  const root = document.querySelector('.md-container') || document.body;
   if (!document.getElementById('particles-bg')) {
     const el = document.createElement('div');
     el.id = 'particles-bg';
-    document.body.prepend(el);
+    root.prepend(el);
   }
 })();
 
-// If a user prefers reduced motion, don't start the animation
+/* 2️⃣ Respect users who prefer reduced motion */
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (prefersReducedMotion) {
-  // Nothing else to do—CSS also hides the layer.
   console.info('[particles] reduced motion: disabled');
 } else {
-  // Wait until the DOM is ready so the container exists
   document.addEventListener('DOMContentLoaded', async () => {
-    // Make sure the container exists (works with Option A or B)
-    const container = document.getElementById('particles-bg');
-    if (!container) return;
+    const targetId = 'particles-bg';
+    const el = document.getElementById(targetId);
+    if (!el) return;
 
-    // Load the full tsParticles bundle (already added via CDN in mkdocs.yml)
-    // The global object is "tsParticles".
-    // We call tsParticles.load() with an element id and options.
-    await tsParticles.load('particles-bg', {
-      fpsLimit: 60,                // Cap frame rate for smoothness + battery
-      background: { color: 'transparent' }, // Let the theme color show through
-      fullScreen: { enable: false }, // We manage sizing via CSS (#particles-bg fills screen)
+    /* 3️⃣ Optional: adapt particle colors to system light/dark mode */
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const dot  = dark ? '#90caf9' : '#5c6bc0';
+    const line = dark ? '#42a5f5' : '#303f9f';
+
+    /* 4️⃣ Initialize tsParticles */
+    await tsParticles.load(targetId, {
+      fpsLimit: 60,
+      background: { color: 'transparent' },
+      fullScreen: { enable: false }, // sizing handled via CSS (#particles-bg)
 
       interactivity: {
-        detectsOn: 'window',       // Cursor / touch detection on the window
-        events: {
-          onHover: { enable: true, mode: 'repulse' }, // Particles gently move away from cursor
-          resize: true             // Recompute on resize
-        },
-        modes: {
-          repulse: { distance: 100, duration: 0.4 } // Subtle push on hover
-        }
+        detectsOn: 'window',
+        events: { onHover: { enable: true, mode: 'repulse' }, resize: true },
+        modes: { repulse: { distance: 100, duration: 0.4 } }
       },
 
       particles: {
-        number: {
-          value: 60,               // Particle count (tune for performance)
-          density: { enable: true, area: 800 } // Auto-scale with viewport
-        },
-        color: { value: '#9fa8da' }, // Soft indigo (fits your theme)
-        shape: { type: 'circle' },   // Circle dots; could be 'triangle', 'polygon', 'star'
-        opacity: { value: 0.5 },     // Semi-transparent
-        size: { value: 2, random: { enable: true, minimumValue: 1 } }, // 1–2px dots
-        links: {
-          enable: true,              // Connect nearby particles with lines
-          distance: 140,
-          color: '#5c6bc0',          // Deeper indigo for lines
-          opacity: 0.35,
-          width: 1
-        },
-        move: {
+        number: { value: 60, density: { enable: true, area: 800 } },
+        color:  { value: dot },
+        shape:  { type: 'circle' },
+        opacity:{ value: 0.55 },
+        size:   { value: 2.8, random: { enable: true, minimumValue: 1.4 } },
+        links:  { enable: true, distance: 140, color: line, opacity: 0.75, width: 1 },
+        move:   {
           enable: true,
-          speed: 0.6,                // Gentle drift
+          speed: 0.6,
           direction: 'none',
           random: false,
           straight: false,
-          outModes: { default: 'out' }, // When leaving bounds, re-enter from opposite side
+          outModes: { default: 'out' },
           attract: { enable: false }
         }
       },
 
-      detectRetina: true // Sharper rendering on HiDPI screens
+      detectRetina: true
     });
 
     console.info('[particles] started');
