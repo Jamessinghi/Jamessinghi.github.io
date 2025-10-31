@@ -50,3 +50,97 @@ h1, h2, h3 {
     padding: 0.5em 1em;
   }
 }
+
+/* === Pastel Bubble Background support (for bg-bubbles.js) ================= */
+
+/* Ensure page content sits above the background SVG and stays transparent. */
+html, body, .md-main, .md-content, .md-typeset {
+  position: relative;                /* create a stacking context */
+  z-index: 1;                        /* above the background (#bg-bubbles has z=0) */
+  background: transparent !important;/* avoid any opaque body background */
+}
+
+/* The shared keyframe used by all bubbles.
+   Each circle has its own --dx / --dy set from JS for unique drift. */
+@keyframes bubble-drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(var(--dx), var(--dy)); }
+}
+
+/* Prefer reduced motion: hide the SVG entirely. */
+@media (prefers-reduced-motion: reduce) {
+  #bg-bubbles { display: none !important; }
+}
+/* Improve transform performance for the animated bubbles */
+#bg-bubbles circle {
+  will-change: transform; /* hint GPU acceleration */
+}
+
+/* Help the browser allocate GPU resources wisely */
+#bg-bubbles circle { will-change: transform; }
+
+/* Canvas is already fast, but this keeps it composited efficiently */
+#matrix-bg { contain: strict; }
+
+/* docs/stylesheets/extra.css */
+#ticker-bg { contain: strict; }
+
+/* Light text when the ticker asks for dark content */
+.ticker-dark body,
+.ticker-dark .md-content,
+.ticker-dark .md-typeset {
+  color: #eef6ef !important;             /* soft white-green */
+}
+
+.ticker-dark .md-typeset h1,
+.ticker-dark .md-typeset h2,
+.ticker-dark .md-typeset h3 {
+  color: #ffffff !important;             /* brighter for headings */
+  font-weight: 800;                      /* bolder */
+}
+
+/* Links: brighter green with underline on hover for accessibility */
+.ticker-dark a { color: #8fe3b0; }
+.ticker-dark a:hover { text-decoration: underline; }
+
+/* --- Remove the white "Home" chip/breadcrumb anywhere it appears in content --- */
+
+/* Hide breadcrumbs/chips no matter which variant Material uses */
+nav[aria-label="breadcrumbs"],
+.md-breadcrumbs {
+  display: none !important;
+}
+
+/* If a chip-like nav is used instead of breadcrumbs, nuke its card styling */
+.md-nav--primary,
+.md-nav--primary .md-nav__title,
+.md-nav--primary .md-nav__link,
+.md-breadcrumbs,
+.md-breadcrumbs__item,
+.md-breadcrumbs__link {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+/* Also remove any focus/elevation highlight that can create a white box */
+.md-nav__link:focus,
+.md-nav__link:focus-visible,
+.md-breadcrumbs__link:focus,
+.md-breadcrumbs__link:focus-visible {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+/* --- Remove the leftover "Home" breadcrumb/link that sits INSIDE the page --- */
+/* Material injects a small <nav> before the page body; target only that one. */
+.md-content__inner > nav:first-of-type,
+.md-content__inner > nav[aria-label="breadcrumbs"],
+.md-content__inner .md-breadcrumbs {
+  display: none !important;
+}
+
+/* Safety: if your build uses the chip-style primary nav inside content, hide it too */
+.md-content__inner .md-nav--primary {
+  display: none !important;
+}
