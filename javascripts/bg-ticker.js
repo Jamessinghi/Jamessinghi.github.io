@@ -1,45 +1,49 @@
 /* ============================================================================
-   Horizontal Cyber Ticker Background — Final Crisp Version (No Blur)
-   - Fully opaque canvas (no alpha blending)
-   - Each frame fully repainted (no trails)
-   - Text aligned to integer pixels for crispness
-   - Optional USE_DARK_CONTENT toggle for white-on-dark page text
+   Horizontal Cyber Ticker Background — Fade-Under-Content (Tight Cover)
+   - Same crisp left→right ticker (binary + stock tape)
+   - Smooth fade under only the H1 + first paragraph
+   - Cover box hugs text with ~2ch padding (≈ 2 characters)
+   - No transparency punching (so no white card ever shows through)
    ========================================================================== */
 
 (function () {
-  // Respect system reduced motion preference
+  // Respect reduced-motion preference
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  // Prevent duplicate canvas
+  // Prevent duplicates
   if (document.getElementById('ticker-bg')) return;
 
   // === CONFIGURATION =========================================================
-  const USE_DARK_CONTENT = true; // set false if you want normal dark text
-
-  const MIN_SPEED = 40;  // px/sec
+  const USE_DARK_CONTENT = true;       // makes page text white on dark
+  const MIN_SPEED = 40;                // px/sec
   const MAX_SPEED = 110;
-
   const BASE_FONT_PX = 16;
   const LINE_HEIGHT  = 1.35;
   const FONT_FAMILY  = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 
   // Colors
-  const COLOR_CODE   = '#2b8a5a';        // binary color (dark gloomy green)
-  const COLOR_LABEL  = '#d2dcdc';        // stock symbol
-  const COLOR_UP     = '#18d39a';        // green up
-  const COLOR_DOWN   = '#ff6b6b';        // red down
-  const COLOR_SEP    = '#cde0cd';        // separators
+  const COLOR_CODE   = '#2b8a5a';      // binary green
+  const COLOR_LABEL  = '#d2dcdc';      // stock label
+  const COLOR_UP     = '#18d39a';      // price up
+  const COLOR_DOWN   = '#ff6b6b';      // price down
+  const COLOR_SEP    = '#cde0cd';      // separator dots
 
-  // Fully opaque gradient wash (no alpha)
+  // Background wash (gloomy green gradient)
   const WASH_TOP     = '#071a0f';
   const WASH_MID     = '#0a1f12';
   const WASH_BOTTOM  = '#07190c';
 
-  // Disable shadows to prevent soft glow
+  // Disable glows
   const SHADOW_COLOR = 'transparent';
   const SHADOW_BLUR  = 0;
 
+  // Stocks to simulate
   const TICKERS = ['AAPL','MSFT','NVDA','GOOGL','AMZN','TSLA','META','AMD'];
+
+  // Fade-under-content configuration
+  const ENABLE_FADE_COVER = true;      // draw a cover over content instead of cutting a hole
+  const RADIUS_PX   = 10;              // rounded corners for the cover
+  const FEATHER_OPACITY = 0.92;        // 0–1: how strongly we fade the ticker under content
 
   // === CANVAS SETUP ==========================================================
   const canvas = document.createElement('canvas');
@@ -54,7 +58,7 @@
   });
   document.body.prepend(canvas);
 
-  // ✅ IMPORTANT: alpha:false prevents blending blur between frames
+  // Opaque canvas: we paint *over* the ticker to fade, never punch through
   const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
 
   // === STATE ================================================================
@@ -62,24 +66,20 @@
   let W = 0, H = 0;
   let fontPx = 0, lineGap = 0;
   let rows = [];
-  // clamp DPR to keep perf sane
-  // canvas backing-store size in device pixels
-  // device-pixel font size
-  // device-pixel row step
   let stock = TICKERS.map(sym => ({ sym, price: seedPrice(sym), prev: null }));
+  // The tight cover region (device pixels)
+  let cover = null;
 
-  // ---------- Helpers: stock price simulation --------------------------------
+  // ---------- Stock price simulation ----------------------------------------
   function seedPrice(sym) {
     const base = { AAPL:190, MSFT:420, NVDA:820, GOOGL:155, AMZN:175, TSLA:210, META:500, AMD:155 };
     return (base[sym] || 100) + Math.random() * 2 - 1;
   }
-
   function stepPrice(p) {
     const step = (Math.random() - 0.5) * (Math.random() < 0.9 ? 0.8 : 3.2);
     return Math.max(1, p + step);
   }
-// Build an array of “segments” (text + color) like:
-// [ {text:'AAPL ', color:...}, {text:'190.12 ', color:...}, {text:'▲0.12%', color:...}, ...]
+
   function buildStockSegments() {
     stock.forEach(s => { s.prev = s.price; s.price = stepPrice(s.price); });
     const segs = [];
@@ -104,20 +104,136 @@
   }
 
   function makeRow(y, index) {
-    const type = (index % 2 === 0) ? 'code' : 'stock';
+    const type  = (index % 2 === 0) ? 'code' : 'stock';
     const speed = lerp(MIN_SPEED, MAX_SPEED, Math.random());
-    const x = -Math.random() * (W * 0.75);
+    const x     = -Math.random() * (W * 0.75);
     if (type === 'code') {
       const text = buildCodeString(W * 1.5);
       return { y, x, speed, type, text, width: ctx.measureText(text).width };
     } else {
       const parts = buildStockSegments();
-      const width = parts.reduce((acc, seg) => acc + ctx.measureText(seg.text).width, 0);
+      const width = parts.reduce((a, s) => a + ctx.measureText(s.text).width, 0);
       return { y, x, speed, type, parts, width };
     }
   }
-  // ---------- Fit canvas to device pixels & (re)build rows --------------------
-  // === RESIZE HANDLER =======================================================
+
+  // ---------- Utility: build rounded rectangle path (device pixels) ----------
+  function roundedRectPath(ctx2, x, y, w, h, r) {
+    const rr = Math.min(r, Math.floor(Math.min(w, h) / 2));
+    ctx2.beginPath();
+    ctx2.moveTo(x + rr, y);
+    ctx2.lineTo(x + w - rr, y);
+    ctx2.quadraticCurveTo(x + w, y, x + w, y + rr);
+    ctx2.lineTo(x + w, y + h - rr);
+    ctx2.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+    ctx2.lineTo(x + rr, y + h);
+    ctx2.quadraticCurveTo(x, y + h, x, y + h - rr);
+    ctx2.lineTo(x, y + rr);
+    ctx2.quadraticCurveTo(x, y, x + rr, y);
+    ctx2.closePath();
+  }
+
+  // ---------- Measure ~2ch (two “character” units) for an element -----------
+  function twoChPx(el) {
+    // Create a hidden span that uses `ch` units in the *element's* font
+    const span = document.createElement('span');
+    span.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;';
+    span.textContent = ''; // width is from CSS width, not content
+    el.appendChild(span);
+    span.style.width = '2ch';
+    const px = span.getBoundingClientRect().width || 16; // fallback
+    el.removeChild(span);
+    return px;
+  }
+
+  // ---------- Compute a tight cover around H1 + first real content block ------
+function computeCoverArea() {
+  if (!ENABLE_FADE_COVER) { cover = null; return; }
+
+  // 1) Find the typographic container Material uses for page content.
+  const scope = document.querySelector('.md-typeset') || document.body;
+
+  // 2) Find the page title (h1) inside that scope.
+  const titleEl = scope.querySelector('h1');
+
+  // 3) Find the first *meaningful* block after the title.
+  //    Supports paragraph, lists, tables, code blocks, blockquotes, etc.
+  //    If there’s no h1, we still try to grab the first content block.
+  const CONTENT_SELECTORS = [
+    'p', 'ul', 'ol', 'table', 'pre', 'blockquote',
+    'dl', 'figure', '.admonition', '.tabbed-set', '.superfences'
+  ].join(',');
+
+  // Prefer “the first block after h1”; otherwise the first block in the scope.
+  let bodyEl = null;
+  if (titleEl) {
+    // Walk forward to the next element sibling that matches our set
+    let n = titleEl.nextElementSibling;
+    while (n && !n.matches(CONTENT_SELECTORS)) n = n.nextElementSibling;
+    bodyEl = n || scope.querySelector(CONTENT_SELECTORS);
+  } else {
+    bodyEl = scope.querySelector(CONTENT_SELECTORS);
+  }
+
+  // 4) Choose two targets to union:
+  //    - A: title or scope fallback
+  //    - B: first real content block (or A if missing)
+  const targetA = titleEl || scope;
+  const targetB = bodyEl  || targetA;
+
+  // 5) Measure their CSS-pixel rects and build a union that covers both.
+  const ra = targetA.getBoundingClientRect();
+  const rb = targetB.getBoundingClientRect();
+  const left   = Math.min(ra.left,  rb.left);
+  const top    = Math.min(ra.top,   rb.top);
+  const right  = Math.max(ra.right, rb.right);
+  const bottom = Math.max(ra.bottom,rb.bottom);
+  const merged = { x: left, y: top, w: right - left, h: bottom - top };
+
+  // 6) Use ~2ch padding (≈ two characters) measured from the body block’s font
+  //    so the cover hugs the real text nicely.
+  const padRef = bodyEl || targetA;
+  const padCh  = twoChPx(padRef);          // width of “00” in that font
+  const padX   = padCh;                     // left/right ≈ 2ch
+  const padY   = Math.max(8, padCh * 0.8);  // top/bottom a touch tighter
+
+  // 7) Expand + clamp to viewport, then convert to device pixels for canvas.
+  const css = {
+    x: Math.max(0, merged.x - padX),
+    y: Math.max(0, merged.y - padY),
+    w: Math.min(window.innerWidth  - Math.max(0, merged.x - padX), merged.w + padX * 2),
+    h: Math.min(window.innerHeight - Math.max(0, merged.y - padY), merged.h + padY * 2)
+  };
+
+  cover = {
+    x: Math.round(css.x * DPR),
+    y: Math.round(css.y * DPR),
+    w: Math.round(css.w * DPR),
+    h: Math.round(css.h * DPR),
+    r: Math.round(RADIUS_PX * DPR)
+  };
+}
+
+  // ---------- Paint a soft cover over the content area -----------------------
+  function coverContentArea() {
+    if (!cover || !ENABLE_FADE_COVER) return;
+
+    ctx.save();
+    ctx.globalAlpha = FEATHER_OPACITY;
+
+    // Match the background wash so it looks like the ticker “dives” underneath
+    const g = ctx.createLinearGradient(0, cover.y, 0, cover.y + cover.h);
+    g.addColorStop(0,   WASH_TOP);
+    g.addColorStop(0.5, WASH_MID);
+    g.addColorStop(1,   WASH_BOTTOM);
+    ctx.fillStyle = g;
+
+    roundedRectPath(ctx, cover.x, cover.y, cover.w, cover.h, cover.r);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ---------- Fit canvas to viewport + rebuild rows --------------------------
   function fit() {
     DPR = Math.max(1, Math.min(2.5, window.devicePixelRatio || 1));
     const cssW = window.innerWidth, cssH = window.innerHeight;
@@ -126,9 +242,7 @@
     canvas.height = Math.floor(cssH * DPR);
     canvas.style.width  = cssW + 'px';
     canvas.style.height = cssH + 'px';
-
-    W = canvas.width;
-    H = canvas.height;
+    W = canvas.width; H = canvas.height;
 
     fontPx = Math.floor(BASE_FONT_PX * DPR);
     ctx.font = `${fontPx}px ${FONT_FAMILY}`;
@@ -138,7 +252,6 @@
     ctx.imageSmoothingEnabled = false;
 
     lineGap = Math.floor(fontPx * LINE_HEIGHT);
-
     rows = [];
     const topPad = Math.floor(lineGap * 1.4);
     const bottomPad = Math.floor(lineGap * 1.4);
@@ -149,21 +262,22 @@
       rows.push(makeRow(y, i));
     }
 
-    // Toggle white-on-dark text mode
+    // Build tight cover for current layout
+    computeCoverArea();
+
     if (USE_DARK_CONTENT)
       document.documentElement.classList.add('ticker-dark');
     else
       document.documentElement.classList.remove('ticker-dark');
   }
 
-  // ---------- Main animation loop --------------------------------------------
-  // === RENDER LOOP ==========================================================
+  // ---------- Animation loop -------------------------------------------------
   let last = performance.now();
   function tick(now) {
     const dt = (now - last) / 1000;
     last = now;
 
-    // Fully repaint the opaque background (no transparency)
+    // Paint background
     const g = ctx.createLinearGradient(0, 0, 0, H);
     g.addColorStop(0, WASH_TOP);
     g.addColorStop(0.5, WASH_MID);
@@ -180,9 +294,9 @@
         ctx.fillStyle = COLOR_CODE;
         ctx.fillText(row.text, sx, row.y);
         if (row.x > W + 50 * DPR) {
-          row.text = buildCodeString(W * 1.5);
+          row.text  = buildCodeString(W * 1.5);
           row.width = ctx.measureText(row.text).width;
-          row.x = -row.width - 50 * DPR;
+          row.x     = -row.width - 50 * DPR;
         }
       } else {
         let dx = sx;
@@ -193,20 +307,29 @@
         });
         if (row.x > W + 50 * DPR) {
           row.parts = buildStockSegments();
-          row.width = row.parts.reduce((acc, seg) => acc + ctx.measureText(seg.text).width, 0);
+          row.width = row.parts.reduce((a, s) => a + ctx.measureText(s.text).width, 0);
           row.x = -row.width - 50 * DPR;
         }
       }
     });
 
+    // Fade the ticker under the tight title+paragraph area
+    coverContentArea();
+
     requestAnimationFrame(tick);
   }
 
+  // Helpers
   function lerp(a, b, t) { return a + (b - a) * t; }
 
-  window.addEventListener('resize', fit, { passive: true });
+  // Keep timing stable on tab switches
   document.addEventListener('visibilitychange', () => { last = performance.now(); });
 
+  // Recompute layout on resize and after load (fonts can shift sizes)
+  window.addEventListener('resize', () => { fit(); computeCoverArea(); }, { passive: true });
+  window.addEventListener('load',  () => { computeCoverArea(); }, { once: true });
+
+  // Boot
   fit();
   last = performance.now();
   requestAnimationFrame(tick);

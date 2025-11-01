@@ -144,3 +144,66 @@ nav[aria-label="breadcrumbs"],
 .md-content__inner .md-nav--primary {
   display: none !important;
 }
+/* === Make Material's content card transparent so the canvas hole doesn't reveal a white box === */
+.md-main,
+.md-main__inner,
+.md-content,
+.md-content__inner,
+.md-typeset {
+  background: transparent !important;   /* kill the card/background */
+  box-shadow: none !important;          /* remove elevation */
+}
+
+/* Some Material builds paint the card via a pseudo-element — nuke that too */
+.md-content__inner::before,
+.md-content__inner::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Keep text readable on the dark ticker background */
+.ticker-dark .md-content,
+.ticker-dark .md-typeset {
+  color: #eef6ef !important;
+}
+.ticker-dark .md-typeset h1,
+.ticker-dark .md-typeset h2,
+.ticker-dark .md-typeset h3 {
+  color: #ffffff !important;
+}
+/* === Kill all default white content backgrounds revealed through the canvas === */
+.md-main,
+.md-main__inner,
+.md-content,
+.md-content__inner,
+.md-content__inner::before,
+.md-content__inner::after,
+.md-typeset,
+.md-typeset::before,
+.md-typeset::after {
+  background: transparent !important; /* force transparency */
+  box-shadow: none !important;        /* remove card elevation */
+  border: none !important;
+  filter: none !important;
+}
+
+/* Remove any Material pseudo-element shading or overlays */
+.md-main::before,
+.md-main::after,
+.md-main__inner::before,
+.md-main__inner::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Reinforce text visibility on dark background */
+body.ticker-dark,
+.ticker-dark .md-content,
+.ticker-dark .md-typeset {
+  color: #eef6ef !important;
+}
+.ticker-dark .md-typeset h1,
+.ticker-dark .md-typeset h2,
+.ticker-dark .md-typeset h3 {
+  color: #ffffff !important;
+}
