@@ -207,3 +207,56 @@ body.ticker-dark,
 .ticker-dark .md-typeset h3 {
   color: #ffffff !important;
 }
+/* === One continuous header background (exactly like the purple bar) ===== */
+
+/* Make the real header rows transparent so the art shows through */
+.md-header,
+.md-tabs {
+  background: transparent !important;
+}
+
+/* Root for variables + defaults */
+body.header-skin--image {
+  --header-skin-image: none;
+  /* Material exposes --md-header-height; use it and fall back to ~100px */
+  --header-total-height: calc(
+  var(--md-header-height, 2.5rem) +
+  var(--md-tabs-height, 2.5rem)
+);
+}
+
+/* Paint the image ONCE, behind both rows, but BELOW header controls */
+body.header-skin--image::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-total-height);
+
+  /* image + gentle overlay for readability */
+  background-image:
+    linear-gradient(to bottom,
+      rgba(0,0,0,.10) 0%,
+      rgba(0,0,0,.06) 50%,
+      rgba(0,0,0,0) 100%),
+    var(--header-skin-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* Above your page canvases (z=0), below interactive header content */
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Keep the header rows clickable above the strip */
+.md-header,
+.md-tabs {
+  position: relative;
+  z-index: 2;
+}
+
+/* Pick which PNG to use per page */
+body.header-skin--green { --header-skin-image: url("../assets/header-bar-green.png"); }
+body.header-skin--black { --header-skin-image: url("../assets/header-bar-black.png"); }
