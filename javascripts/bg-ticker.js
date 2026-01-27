@@ -13,6 +13,16 @@
   // Prevent duplicates
   if (document.getElementById('ticker-bg')) return;
 
+  async function loadQuotes() {
+  try {
+    const r = await fetch('/assets/quotes.json', { cache: 'no-store' });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) {
+    return null;
+  }
+}
+
   // === CONFIGURATION =========================================================
   const USE_DARK_CONTENT = true;       // makes page text white on dark
   const MIN_SPEED = 40;                // px/sec
@@ -65,10 +75,12 @@
   let DPR = Math.max(1, Math.min(2.5, window.devicePixelRatio || 1));
   let W = 0, H = 0;
   let fontPx = 0, lineGap = 0;
-  let rows = [];
-  let stock = TICKERS.map(sym => ({ sym, price: seedPrice(sym), prev: null }));
-  // The tight cover region (device pixels)
-  let cover = null;
+ let rows = [];
+let stock = TICKERS.map(sym => ({ sym, price: seedPrice(sym), prev: null }));
+let quotesMeta = { updated_at_utc: null };
+let HAS_REAL_QUOTES = false;   // <-- ADD THIS
+// The tight cover region (device pixels)
+let cover = null;
 
   // ---------- Stock price simulation ----------------------------------------
   function seedPrice(sym) {
@@ -81,19 +93,25 @@
   }
 
   function buildStockSegments() {
-    stock.forEach(s => { s.prev = s.price; s.price = stepPrice(s.price); });
-    const segs = [];
-    stock.forEach(s => {
-      const delta = ((s.price - s.prev) / s.prev) * 100;
-      const up = delta >= 0;
-      const arrow = up ? '▲' : '▼';
-      segs.push({ text: `${s.sym} `, color: COLOR_LABEL });
-      segs.push({ text: `${s.price.toFixed(2)} `, color: up ? COLOR_UP : COLOR_DOWN });
-      segs.push({ text: `${arrow}${Math.abs(delta).toFixed(2)}%`, color: up ? COLOR_UP : COLOR_DOWN });
-      segs.push({ text: '   •   ', color: COLOR_SEP });
+  const segs = [];
+
+  stock.forEach(s => {
+    const pc = (typeof s.prev_close === "number" && s.prev_close > 0) ? s.prev_close : s.price;
+const delta = ((s.price - pc) / pc) * 100;
+    const up = delta >= 0;
+    const arrow = up ? '▲' : '▼';
+
+    segs.push({ text: `${s.sym} `, color: COLOR_LABEL });
+    segs.push({ text: `${s.price.toFixed(2)} `, color: up ? COLOR_UP : COLOR_DOWN });
+    segs.push({
+      text: `${arrow}${Math.abs(delta).toFixed(2)}%`,
+      color: up ? COLOR_UP : COLOR_DOWN
     });
-    return segs.concat(segs);
-  }
+    segs.push({ text: '   •   ', color: COLOR_SEP });
+  });
+
+  return segs.concat(segs);
+}
 
   function buildCodeString(targetWidthPx) {
     let s = '';
@@ -329,8 +347,31 @@ function computeCoverArea() {
   window.addEventListener('resize', () => { fit(); computeCoverArea(); }, { passive: true });
   window.addEventListener('load',  () => { computeCoverArea(); }, { once: true });
 
-  // Boot
+  // Boot (load quotes first, then start)
+(async () => {
+  const quotes = await loadQuotes();
+
+  if (quotes) {
+  HAS_REAL_QUOTES = true;  // <-- ADD THIS
+  quotesMeta.updated_at_utc = quotes.updated_at_utc || null;
+
+  // Override seeded prices with real ones when present
+ stock = TICKERS.map(sym => {
+  const q = quotes[sym];
+  const price = Number(q?.price);
+  const prevClose = Number(q?.prev_close); // <-- Twelve Data uses previous_close
+
+  return {
+    sym,
+    price: Number.isFinite(price) ? price : seedPrice(sym),
+    prev_close: Number.isFinite(prevClose) ? prevClose : (Number.isFinite(price) ? price : seedPrice(sym))
+  };
+});
+}
+
   fit();
   last = performance.now();
   requestAnimationFrame(tick);
+})();
+
 })();
