@@ -1,0 +1,38 @@
+name: Update stock quotes (Twelve Data)
+
+on:
+  schedule:
+    - cron: "15 * * * *"   # every hour at :15
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch quotes
+        env:
+          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
+        run: python scripts/fetch_quotes_twelvedata.py
+
+      - name: Commit quotes.json if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add docs/assets/quotes.json
+          git commit -m "Update quotes.json" || exit 0
+          git push
