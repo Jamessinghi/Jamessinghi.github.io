@@ -83,7 +83,15 @@ html, body, .md-main, .md-content, .md-typeset {
 #matrix-bg { contain: strict; }
 
 /* docs/stylesheets/extra.css */
-#ticker-bg { contain: strict; }
+#ticker-bg {
+  contain: strict;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
 
 /* Light text when the ticker asks for dark content */
 .ticker-dark body,
@@ -131,13 +139,6 @@ nav[aria-label="breadcrumbs"],
   background: transparent !important;
   box-shadow: none !important;
   outline: none !important;
-}
-/* --- Remove the leftover "Home" breadcrumb/link that sits INSIDE the page --- */
-/* Material injects a small <nav> before the page body; target only that one. */
-.md-content__inner > nav:first-of-type,
-.md-content__inner > nav[aria-label="breadcrumbs"],
-.md-content__inner .md-breadcrumbs {
-  display: none !important;
 }
 
 /* Safety: if your build uses the chip-style primary nav inside content, hide it too */
@@ -225,31 +226,6 @@ body.header-skin--image {
 );
 }
 
-/* Paint the image ONCE, behind both rows, but BELOW header controls */
-body.header-skin--image::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--header-total-height);
-
-  /* image + gentle overlay for readability */
-  background-image:
-    linear-gradient(to bottom,
-      rgba(0,0,0,.10) 0%,
-      rgba(0,0,0,.06) 50%,
-      rgba(0,0,0,0) 100%),
-    var(--header-skin-image);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  /* Above your page canvases (z=0), below interactive header content */
-  z-index: 1;
-  pointer-events: none;
-}
-
 /* Keep the header rows clickable above the strip */
 .md-header,
 .md-tabs {
@@ -260,3 +236,150 @@ body.header-skin--image::before {
 /* Pick which PNG to use per page */
 body.header-skin--green { --header-skin-image: url("../assets/header-bar-green.png"); }
 body.header-skin--black { --header-skin-image: url("../assets/header-bar-black.png"); }
+
+/* === Remove in-page breadcrumb ("Home") completely ===================== */
+
+/* Standard breadcrumb nav */
+.md-breadcrumbs,
+nav[aria-label="breadcrumbs"] {
+  display: none !important;
+}
+
+/* Some builds inject it inside content */
+.md-content__inner > nav:first-of-type {
+  display: none !important;
+}
+
+/* Safety: kill any leftover breadcrumb links */
+.md-breadcrumbs__link,
+.md-breadcrumbs__item {
+  display: none !important;
+}
+
+/* === Remove the in-page "Home" breadcrumb / page path (ALL Material variants) === */
+
+.md-breadcrumbs,
+.md-breadcrumbs__list,
+.md-breadcrumbs__item,
+.md-breadcrumbs__link,
+nav[aria-label="breadcrumbs"],
+nav.md-breadcrumbs,
+nav.md-path {
+  display: none !important;
+}
+
+/* Page-path row Material injects above content */
+.md-content__inner > .md-path,
+.md-content__inner > nav.md-path,
+.md-content__inner > nav[aria-label="breadcrumbs"],
+.md-content__inner > nav:first-child {
+  display: none !important;
+}
+
+/* Safety: breadcrumb rendered inside article wrapper */
+.md-article .md-path,
+.md-article nav[aria-label="breadcrumbs"] {
+  display: none !important;
+}
+/* === Fix the floating blue "Home" (it's the left sidebar link) === */
+/* Hide sidebars so nothing can "leak" through transparent backgrounds */
+.md-sidebar--primary,
+.md-sidebar--secondary {
+  display: none !important;
+}
+
+/* Re-center the main page since sidebars are gone */
+.md-main__inner {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  justify-content: center !important;
+}
+
+/* Ensure content stays centered */
+.md-content {
+  max-width: 900px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+/* To remove the white nav bar provided with mkdocs : It worked because Material injects the page path (“Home”) as a breadcrumb/nav element
+inside the content, not as part of the header, and your final selectors targeted all of Material’s breadcrumb/path variants at the exact DOM
+level where they’re inserted. By explicitly hiding those injected nav nodes after the theme renders (and not touching the header or tabs),
+you removed the blue “Home” without affecting layout, routing, or background stacking.*/
+
+/* =========================
+   HEADER BACKGROUNDS
+   ========================= */
+
+/* Ensure header is above ticker */
+.md-header,
+.md-tabs {
+  position: relative;
+  z-index: 10;
+}
+
+/* PNG strip for non-glass pages (Projects/Resume) */
+body.header-skin--image::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: calc(var(--md-header-height, 2.5rem) + var(--md-tabs-height, 2.5rem));
+  background-image:
+    linear-gradient(to bottom, rgba(0,0,0,.10), rgba(0,0,0,.00)),
+    var(--header-skin-image);
+  background-size: cover;
+  background-position: center;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* choose PNGs */
+body.header-skin--green { --header-skin-image: url("../assets/header-bar-green.png"); }
+body.header-skin--black { --header-skin-image: url("../assets/header-bar-black.png"); }
+
+/* =========================
+   GLASS (Home + Contact only)
+   ========================= */
+
+body.glass-header::before { content: none !important; display: none !important; }
+body.glass-header.header-skin--image::before { content: none !important; display: none !important; }
+
+/* The actual glass effect */
+body.glass-header .md-header,
+body.glass-header .md-tabs {
+  background: rgba(8, 22, 12, 0.55) !important; /* stronger tint */
+  -webkit-backdrop-filter: blur(38px) saturate(190%) contrast(115%) !important;
+  backdrop-filter: blur(38px) saturate(190%) contrast(115%) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.14) !important;
+  box-shadow: 0 12px 34px rgba(0,0,0,0.30) !important;
+}
+
+/* remove duplicate repo label inside tabs row */
+body.glass-header .md-tabs .md-source,
+body.glass-header .md-tabs .md-tabs__source,
+body.glass-header .md-tabs .md-header__source {
+  display: none !important;
+}
+/* === Remove the thin white divider line in the top banner === */
+.md-header,
+.md-tabs {
+  border-bottom: none !important;
+}
+
+.md-header::after,
+.md-tabs::after {
+  display: none !important;
+}
+/* === Fix seam line between header + tabs (glass only) === */
+
+/* Remove divider/shadow from the TOP row only */
+body.glass-header .md-header {
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* Keep the visual depth on the tabs row */
+body.glass-header .md-tabs {
+  border-top: none !important;
+}
+
+

@@ -8,44 +8,47 @@
     const body = document.body;
     if (!body) return;
 
-    // Clear any previous classes
-    body.classList.remove('header-skin--image', 'header-skin--green', 'header-skin--black');
+    // Clear previous skin + glass state
+    body.classList.remove(
+      "header-skin--image",
+      "header-skin--green",
+      "header-skin--black",
+      "glass-header"
+    );
 
-    // Decide which skin by URL slug
     const slug = lastSegment().toLowerCase();
 
-    // Home + Contact → GREEN, Projects + Resume → BLACK
-    const GREEN = new Set(['', 'index', 'contact']);
-    const BLACK = new Set(['projects', 'resume']);
+    const GREEN_GLASS = new Set(["", "index", "contact"]); // Home + Contact
+    const BLACK_PNG   = new Set(["projects", "resume"]);   // Projects + Resume
 
-    if (GREEN.has(slug)) {
-      body.classList.add('header-skin--image', 'header-skin--green');
-    } else if (BLACK.has(slug)) {
-      body.classList.add('header-skin--image', 'header-skin--black');
+    if (GREEN_GLASS.has(slug)) {
+      // Home + Contact: GLASS only (no PNG strip)
+      body.classList.add("header-skin--green", "glass-header");
+    } else if (BLACK_PNG.has(slug)) {
+      // Projects + Resume: keep PNG strip
+      body.classList.add("header-skin--image", "header-skin--black");
+    } else {
+      // default behavior (pick one)
+      body.classList.add("header-skin--image", "header-skin--black");
     }
-    // any other page: no skin (falls back to theme)
   }
 
   function lastSegment() {
-    // Works locally and on GitHub Pages
-    const segs = location.pathname.split('/').filter(Boolean);
-    if (segs.length === 0) return 'index';
+    const segs = location.pathname.split("/").filter(Boolean);
+    if (segs.length === 0) return "index";
     const last = segs[segs.length - 1];
-    return last.replace(/\.html?$/i, '') || 'index';
+    return last.replace(/\.html?$/i, "") || "index";
   }
 
-  // First run
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applySkin);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", applySkin);
   } else {
     applySkin();
   }
 
-  // Re-run after each MkDocs Material instant nav
-  if (window.document$ && typeof window.document$.subscribe === 'function') {
+  if (window.document$ && typeof window.document$.subscribe === "function") {
     window.document$.subscribe(applySkin);
   }
 
-  // Also handle back/forward navigation just in case
-  window.addEventListener('popstate', applySkin);
+  window.addEventListener("popstate", applySkin);
 })();
