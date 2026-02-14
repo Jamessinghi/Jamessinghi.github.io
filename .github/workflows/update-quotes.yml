@@ -22,7 +22,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests mkdocs mkdocs-material
 
       - name: Fetch quotes
         env:
@@ -36,3 +36,6 @@ jobs:
           git add docs/assets/quotes.json
           git commit -m "Update quotes.json" || exit 0
           git push
+
+      - name: Deploy site to GitHub Pages (gh-pages)
+        run: python -m mkdocs gh-deploy --force
