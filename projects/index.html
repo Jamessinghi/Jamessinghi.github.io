@@ -54,6 +54,8 @@
     
       <link rel="stylesheet" href="../stylesheets/extra.css">
     
+      <link rel="stylesheet" href="../stylesheets/quant-card.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -444,7 +446,30 @@
 
   <h1>Projects</h1>
 
-<p>Coming soon — a showcase of my software and finance projects.</p>
+<div class="quant-card">
+  <div class="quant-card__header">
+    <div class="quant-card__kicker">PROJECT</div>
+    <div class="quant-card__title">Discretionary Equity Trading System <span>(2025)</span></div>
+  </div>
+
+  <div class="quant-card__table">
+    <div class="row"><div class="key">Trades Executed</div><div class="val">14</div></div>
+    <div class="row"><div class="key">Avg Gross Return / Trade</div><div class="val">5.8%</div></div>
+    <div class="row"><div class="key">Avg Holding Period</div><div class="val">4.3 days</div></div>
+    <div class="row"><div class="key">Capital Efficiency</div><div class="val">77.8% <span class="sub">(vs avg deployed capital)</span></div></div>
+    <div class="row"><div class="key">Leverage Used</div><div class="val">None</div></div>
+  </div>
+
+  <div class="quant-card__footnote">
+    Full methodology and data model available in project documentation.
+    <a href="../assets/2025_Trade_Log.pdf" 
+    target="_blank" 
+    rel="noopener" 
+    class="quant-link">(Trade Log)</a> <br>
+    Performance metrics derived from documented broker-confirmed trades. <br>
+    Structured trade log and methodology available upon professional request.
+  </div>
+</div>
 
 
 
