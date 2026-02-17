@@ -94,3 +94,112 @@
   color: rgba(255, 255, 255, 1) !important;
   border-bottom-color: rgba(255,255,255,0.8);
 }
+/* =========================
+   System Architecture Section
+   ========================= */
+
+.arch-wrap {
+  max-width: 980px;
+  margin: 2.2rem auto 0;
+  padding: 0 0.5rem;
+}
+
+.arch-title {
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+  color: rgba(20, 24, 28, 0.88);
+}
+
+.arch-subtitle {
+  text-align: center;
+  margin-top: 0.4rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.95rem;
+  color: rgba(20, 24, 28, 0.90);
+}
+
+.arch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.arch-box {
+  background: rgba(255, 255, 255, 0.85);   /* slightly darker glass */
+  backdrop-filter: blur(6px);              /* subtle glass effect */
+  border-radius: 12px;                     /* reduced from 16px */
+  padding: 22px 24px;                      /* tighter padding */
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.08);        /* sharper shadow */
+  border: 1px solid rgba(0, 0, 0, 0.05);   /* subtle fintech edge */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.arch-box__title {
+  font-weight: 750;
+  color: rgba(20, 24, 28, 0.88);
+  margin-bottom: 0.65rem;
+  font-size: 1.02rem;
+}
+
+.arch-list {
+  margin: 0;
+  padding-left: 1.05rem;
+  color: rgba(20, 24, 28, 0.72);
+}
+
+.arch-list li {
+  margin: 0.45rem 0;
+  line-height: 1.25;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 900px) {
+  .arch-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.md-typeset .admonition.note {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.md-typeset .admonition.note > .admonition-title {
+  display: none !important;
+}
+
+.md-typeset .admonition.note > *:not(.admonition-title) {
+  margin: 0 !important;
+}
+
+.arch-box:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.arch-list {
+  margin: 12px 0 0 0;
+  padding-left: 18px;
+}
+
+.arch-list li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.arch-caption {
+  margin: 8px auto 32px auto;     /* center horizontally + spacing below */
+  max-width: 600px;               /* prevents it stretching too wide */
+  text-align: center;             /* center text */
+  font-size: 0.85rem;             /* slightly smaller */
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.90);      /* muted tone */
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+}
