@@ -1,0 +1,30 @@
+{
+  "year": 2025,
+  "trade_count": 14,
+  "avg_pct_gain": 5.77,
+  "avg_days_held": 7.0,
+  "win_rate_pct": 100.0,
+  "tickers_traded": [
+    "360",
+    "4DX",
+    "DRO",
+    "DYL",
+    "ETHI",
+    "EZZ",
+    "GTK",
+    "ILU",
+    "TPW",
+    "WJL"
+  ],
+  "strategies": [
+    "ETF mean-reversion",
+    "Event-driven Rebound",
+    "Momentum",
+    "Momentum Continuation",
+    "Momentum Pullback",
+    "Reclaim",
+    "Reclaim + Continuation",
+    "Reclaim Continuation",
+    "Shock-day Rebound"
+  ]
+}
