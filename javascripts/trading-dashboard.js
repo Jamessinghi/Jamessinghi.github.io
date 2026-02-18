@@ -4,6 +4,27 @@ async function loadJSON(path) {
   return await res.json();
 }
 
+// ===== GLOBAL CHART STYLE =====
+
+// Axis + grid
+Chart.defaults.color = "#ffffff";
+Chart.defaults.scale.grid.color = "rgba(255,255,255,0.25)";
+Chart.defaults.plugins.title.color = "#ffffff";
+
+// Line defaults
+Chart.defaults.elements.line.borderColor = "#3ba3ff";
+Chart.defaults.elements.line.backgroundColor = "rgba(59,163,255,0.12)";
+Chart.defaults.elements.line.borderWidth = 2;
+
+// Point defaults
+Chart.defaults.elements.point.backgroundColor = "#3ba3ff";
+Chart.defaults.elements.point.borderColor = "#3ba3ff";
+
+// Bar defaults
+Chart.defaults.datasets.bar.backgroundColor = "rgba(59,163,255,0.45)";
+Chart.defaults.datasets.bar.borderColor = "#3ba3ff";
+Chart.defaults.datasets.bar.borderWidth = 1;
+
 function uniq(arr) { return [...new Set(arr)]; }
 
 function pctLabel(v) {
@@ -48,6 +69,9 @@ function renderEquityChart(trades) {
       responsive: true,
       plugins: {
         legend: { display: false },
+        title: {
+        display: false,
+        },
         tooltip: {
           callbacks: {
             title: (items) => `Trade % Gain: ${items[0].label}`,
@@ -56,7 +80,8 @@ function renderEquityChart(trades) {
         }
       },
       scales: {
-        x: { ticks: { maxRotation: 0, autoSkip: true } },
+        x: { ticks: { maxRotation: 0, autoSkip: true, color: "#ffffff" }
+      },
         y: { beginAtZero: false }
       }
     }

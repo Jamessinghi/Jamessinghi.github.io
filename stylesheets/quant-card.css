@@ -211,10 +211,12 @@
 }
 
 .dash-header{
-  display:grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 1rem;
-  align-items: end;
+  display: grid;
+  grid-template-columns: 1fr auto;   /* left title, right stack */
+  grid-template-rows: auto auto;     /* metrics row, controls row */
+  column-gap: 1rem;
+  row-gap: .8rem;
+  align-items: start;
   margin-bottom: 1rem;
 }
 
@@ -230,12 +232,6 @@
   font-size: .95rem;
 }
 
-.dash-metrics{
-  display:flex;
-  gap:.75rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
 
 .metric{
   background: rgba(20,24,28,.70);
@@ -257,12 +253,6 @@
   font-size: 1rem;
   font-weight: 800;
   margin-top: .1rem;
-}
-
-.dash-controls{
-  display:flex;
-  gap:.6rem;
-  justify-content: flex-end;
 }
 
 .dash-select{
@@ -353,7 +343,7 @@
 }
 
 #tradeTable th:nth-child(1),
-#tradeTable td:nth-child(1) { width: 3%; }   /* # */
+#tradeTable td:nth-child(1) { width: 8%; }   /* # */
 
 #tradeTable th:nth-child(2),
 #tradeTable td:nth-child(2) { width: 8%; }  /* Ticker */
@@ -371,7 +361,7 @@
 #tradeTable td:nth-child(6) { width: 8%; }   /* Days */
 
 #tradeTable th:nth-child(7),
-#tradeTable td:nth-child(7) { width: 20%; }  /* Strategy */
+#tradeTable td:nth-child(7) { width: 15%; }  /* Strategy */
 
 #tradeTable th:nth-child(1),
 #tradeTable td:nth-child(1),
@@ -391,4 +381,144 @@
 #tradeTable th:nth-child(7),
 #tradeTable td:nth-child(7){
   white-space: normal;
+}
+
+#tradeTable td:nth-child(1),
+#tradeTable th:nth-child(1) {
+  text-align: center;
+}
+
+/* ==============================
+   DASH HEADER ALIGNMENT (CLEAN)
+   Keep ONE version only
+   ============================== */
+
+/* Header layout: left text | right stack (2 rows) */
+.dash-header{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 1rem;
+  row-gap: .8rem;
+  align-items: start;
+}
+
+/* Row 1: Trades / Win Rate / Avg % Gain (docked right, 3 fixed columns) */
+.dash-metrics--right{
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  gap: 16px 20px;
+  justify-content: end;
+  align-items: end;
+}
+
+/* Row 2: Avg Hold / ticker / strategy (same 3-column grid => perfect alignment) */
+.dash-controls{
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  gap: 16px 20px;
+  justify-content: end;
+  align-items: end;
+}
+
+/* Explicit placement (bulletproof, no nth-child reliance) */
+.dash-controls .metric{ grid-column: 1; }
+.dash-controls #tickerSelect{ grid-column: 2; }
+.dash-controls #strategySelect{ grid-column: 3; }
+
+/* ==============================
+   DASH HEADER (BULLETPROOF GRID)
+   Put at VERY BOTTOM of file
+   ============================== */
+
+/*
+  Layout goal:
+
+  [ left title area ] [ col 2 ]   [ col 3 ]     [ col 4 ]
+  Row 1              Trades      Win Rate      Avg % Gain
+  Row 2              Avg Hold    Ticker        Strategy
+
+  All right-side items share the same columns => perfect alignment.
+*/
+
+.dash-header{
+  display: grid;
+
+  /* left column expands, right columns fit content */
+  grid-template-columns: 1fr max-content max-content max-content;
+
+  /* 2 rows: metrics row + controls row */
+  grid-template-rows: auto auto;
+
+  column-gap: 20px;  /* horizontal spacing between right-side columns */
+  row-gap: 16px;     /* vertical spacing between row 1 and row 2 */
+
+  align-items: start;
+}
+
+/* Left title block sits in column 1 spanning both rows */
+.dash-header__left{
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+/* Common: dock right-side items to the right edge */
+.dash-slot{
+  justify-self: end;
+}
+
+/* Row 1 placements */
+.dash-slot--trades   { grid-column: 2; grid-row: 1; }
+.dash-slot--winrate  { grid-column: 3; grid-row: 1; }
+.dash-slot--avggain  { grid-column: 4; grid-row: 1; }
+
+/* Row 2 placements (Avg Hold directly under Trades) */
+.dash-slot--avghold  { grid-column: 2; grid-row: 2; }
+.dash-slot--ticker   { grid-column: 3; grid-row: 2; }
+.dash-slot--strategy { grid-column: 4; grid-row: 2; }
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 950px){
+  .dash-header{
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    row-gap: 12px;
+  }
+
+  .dash-header__left{
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  /* let everything flow naturally on small screens */
+  .dash-slot{
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    justify-self: start;
+  }
+}
+/* ==============================
+   FORCE UNIFORM DASH BUBBLES
+   ============================== */
+
+.metric{
+  width: 120px;        /* fixed width for ALL metric bubbles */
+  height: 80px;       /* fixed height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Make selects match same visual width */
+.dash-select{
+  width: 120px;
+  height: 80px;
 }

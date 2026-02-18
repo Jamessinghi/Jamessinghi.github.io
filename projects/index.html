@@ -470,7 +470,6 @@
     Structured trade log and methodology available upon professional request.
   </div>
 </div>
-<div class="admonition note"></div>
 <div class="arch-wrap">
 <div class="arch-title">System Architecture</div>
 <div class="arch-subtitle">Inputs → Execution Layer → Outputs</div>
@@ -510,28 +509,43 @@
         </div>
       </div>
     </div>
-
 <div class="dash-wrap" id="tradeDash">
-  <div class="dash-header">
-    <div>
-      <div class="dash-title">Interactive Data Visualisation</div>
+ <div class="dash-header">
+    <!-- LEFT: Title block -->
+    <div class="dash-header__left">
+      <div class="dash-title">Interactive Data <br> Visualisation</div>
       <div class="dash-subtitle">Discretionary Trading Performance (2025)</div>
     </div>
 
-<div class="dash-metrics">
-      <div class="metric"><div class="m-k">Trades</div><div class="m-v" id="dashTradeCount">–</div></div>
-      <div class="metric"><div class="m-k">Win Rate</div><div class="m-v" id="dashWinRate">–</div></div>
-      <div class="metric"><div class="m-k">Avg % Gain</div><div class="m-v" id="dashAvgGain">–</div></div>
-      <div class="metric"><div class="m-k">Avg Hold</div><div class="m-v" id="dashAvgDays">–</div></div>
+ <!-- RIGHT: Row 1 -->
+ <div class="metric dash-slot dash-slot--trades">
+    <div class="m-k">Trades</div>
+    <div class="m-v" id="dashTradeCount">–</div>
+ </div>
+
+ <div class="metric dash-slot dash-slot--winrate">
+      <div class="m-k">Win Rate</div>
+      <div class="m-v" id="dashWinRate">–</div>
+ </div>
+
+ <div class="metric dash-slot dash-slot--avggain">
+      <div class="m-k">Avg % Gain</div>
+      <div class="m-v" id="dashAvgGain">–</div>
+ </div>
+
+ <!-- RIGHT: Row 2 -->
+ <div class="metric dash-slot dash-slot--avghold">
+      <div class="m-k">Avg Hold</div>
+      <div class="m-v" id="dashAvgDays">–</div>
 </div>
 
-<div class="dash-controls">
-      <select id="tickerSelect" class="dash-select"></select>
-      <select id="strategySelect" class="dash-select"></select>
-</div>
+ <select id="tickerSelect" class="dash-select dash-slot dash-slot--ticker"></select>
+  <select id="strategySelect" class="dash-select dash-slot dash-slot--strategy"></select>
 </div>
 
-  <div class="dash-grid">
+  <!-- keep the rest of your dashboard (charts/table) unchanged -->
+</div>
+<div class="dash-grid">
     <div class="dash-card">
       <div class="dash-card__title">Equity Curve (Normalised)</div>
       <canvas id="equityChart"></canvas>
@@ -545,7 +559,7 @@
 </div>
 </div>
 
-  <div class="dash-card dash-table">
+<div class="dash-card dash-table">
     <div class="dash-card__title">Trade Log</div>
     <div class="dash-table__wrap">
       <table id="tradeTable">
