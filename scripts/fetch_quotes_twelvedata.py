@@ -16,13 +16,12 @@ OUT_PATH = "docs/assets/quotes.json"
 # relying on batch behavior differences between plans/endpoints.
 BASE_URL = "https://api.twelvedata.com/quote"
 
-def fetch_quote(symbol: str) -> float:
+def fetch_quote(symbol: str) -> dict:
     params = {
         "symbol": symbol,
         "apikey": API_KEY,
     }
 
-    # small retry/backoff (improvement A)
     last_err = None
     for attempt in range(4):
         try:
@@ -30,18 +29,23 @@ def fetch_quote(symbol: str) -> float:
             r.raise_for_status()
             data = r.json()
 
-            # Twelve Data returns {"code":..., "message":...} on errors
             if isinstance(data, dict) and data.get("status") == "error":
                 raise RuntimeError(f"{symbol} error: {data}")
 
-            price = data.get("close") or data.get("price")  # depending on market/data
-            if price is None:
+            price_raw = data.get("close") or data.get("price") or data.get("last")
+            if price_raw is None:
                 raise RuntimeError(f"No price fields for {symbol}: {data}")
 
-            return float(price)
+            prev_close_raw = data.get("previous_close")
+
+            price = float(price_raw)
+            prev_close = float(prev_close_raw) if prev_close_raw not in (None, "") else price
+
+            return {"price": price, "prev_close": prev_close}
+
         except Exception as e:
             last_err = e
-            time.sleep(1.5 * (attempt + 1))  # backoff
+            time.sleep(1.5 * (attempt + 1))
 
     raise RuntimeError(f"Failed to fetch {symbol}: {last_err}")
 
