@@ -13,10 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1) Checkout MAIN (run the python script from here)
       - uses: actions/checkout@v4
         with:
           ref: main
           persist-credentials: true
+          path: main
 
       - uses: actions/setup-python@v5
         with:
@@ -28,12 +30,27 @@ jobs:
       - name: Fetch quotes
         env:
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
-        run: python scripts/fetch_quotes_twelvedata.py
+        run: python main/scripts/fetch_quotes_twelvedata.py
 
-      - name: Commit quotes.json if changed
+      # 2) Checkout GH-PAGES (this is what your live site serves)
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          persist-credentials: true
+          path: pages
+
+      # 3) Copy the generated quotes file into the live location
+      - name: Copy quotes.json into gh-pages
         run: |
+          mkdir -p pages/assets
+          cp main/docs/assets/quotes.json pages/assets/quotes.json
+
+      # 4) Commit ONLY the live quotes.json (on gh-pages) if changed
+      - name: Commit quotes.json if changed (gh-pages)
+        run: |
+          cd pages
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs/assets/quotes.json
+          git add assets/quotes.json
           git commit -m "Update quotes.json" || exit 0
           git push
