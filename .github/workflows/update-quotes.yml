@@ -31,7 +31,7 @@ jobs:
         working-directory: main
         env:
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
-        run: python main/scripts/fetch_quotes_twelvedata.py
+        run: python scripts/fetch_quotes_twelvedata.py
 
       # 2) Checkout GH-PAGES (this is what your live site serves)
       - uses: actions/checkout@v4
