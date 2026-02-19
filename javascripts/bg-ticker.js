@@ -25,6 +25,38 @@
     }
   }
 
+    // --- Simple timestamp badge (bottom-right) ---
+  function showQuoteTimestamp(iso) {
+    if (!iso) return;
+
+    const existing = document.getElementById("quote-timestamp");
+    if (existing) existing.remove();
+
+    const el = document.createElement("div");
+    el.id = "quote-timestamp";
+
+    const date = new Date(iso);
+    const formatted = date.toLocaleString();
+
+    el.textContent = "Quotes updated: " + formatted;
+
+    Object.assign(el.style, {
+      position: "fixed",
+      bottom: "17px",
+      right: "190px",
+      fontSize: "12px",
+      fontFamily: "monospace",
+      background: "rgba(0,0,0,0.6)",
+      color: "#d2dcdc",
+      padding: "6px 10px",
+      borderRadius: "6px",
+      zIndex: "9999",
+      pointerEvents: "none"
+    });
+
+    document.body.appendChild(el);
+  }
+
   // === CONFIGURATION =========================================================
   const USE_DARK_CONTENT = true;       // makes page text white on dark
   const MIN_SPEED = 40;                // px/sec
@@ -334,6 +366,7 @@
     if (quotes) {
       HAS_REAL_QUOTES = true;
       quotesMeta.updated_at_utc = quotes.updated_at_utc || null;
+      showQuoteTimestamp(quotesMeta.updated_at_utc);
 
       // Support BOTH formats:
       // 1) New format (current): { "AAPL": 255.78, ... }
