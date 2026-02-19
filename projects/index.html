@@ -503,7 +503,7 @@
           <ul class="arch-list">
             <li>100% profitable trades recorded</li>
             <li>4–5% average net return per trade</li>
-            <li>7 day avg holding</li>
+            <li>7-day avg holding</li>
             <li>77.8% capital efficiency</li>
           </ul>
         </div>
@@ -578,6 +578,79 @@
       </table>
     </div>
   </div>
+
+<div class="full-width-row">
+
+ <hr>
+
+ <h2 id="amortisation-calculator"> <strong> Loan Amortisation Calculator </strong></h2>
+ <p> <strong> Enter your mortgage details and generate a full amortisation schedule. </strong> </p>
+
+ <div class="amort-wrap">
+  <div class="amort-grid">
+    <div class="amort-card">
+      <h3>Inputs</h3>
+
+  <label>Loan amount (AUD)</label>
+  <input id="amort-principal" type="number" value="600000" min="0" step="1000">
+
+  <label>Interest rate (% p.a.)</label>
+  <input id="amort-rate" type="number" value="6.25" min="0" step="0.01">
+
+  <label>Term (years)</label>
+  <input id="amort-years" type="number" value="30" min="1" step="1">
+
+  <label>Repayment frequency</label>
+  <select id="amort-freq">
+        <option value="12" selected>Monthly</option>
+        <option value="26">Fortnightly</option>
+        <option value="52">Weekly</option>
+  </select>
+
+  <div id="amort-fn-wrapper">
+  <label>Fortnightly mode</label>
+  <select id="amort-fn-mode">
+    <option value="true26">True 26-pay (finance formula)</option>
+    <option value="halfMonthly">Bank-style (monthly ÷ 2)</option>
+  </select>
+  </div>
+
+  <label>Extra repayment (per payment)</label>
+  <input id="amort-extra" type="number" value="0" min="0" step="10">
+
+  <label>Start date</label>
+  <input id="amort-start" type="date">
+
+  <div class="amort-actions">
+        <button class="md-button md-button--primary" id="amort-generate">Generate</button>
+        <button class="md-button" id="amort-export" disabled>Export PDF</button>
+  </div>
+
+  <div class="amort-summary" id="amort-summary"></div>
+ </div>
+
+ <div class="amort-card">
+      <h3>Schedule</h3>
+      <div class="amort-table-wrap">
+        <table class="amort-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Payment</th>
+              <th>Interest</th>
+              <th>Principal</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody id="amort-body">
+            <tr><td colspan="6" style="opacity:.7;">Generate a schedule to see results…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+ </div>
 </div>
 
 
@@ -669,6 +742,8 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       
         <script src="../javascripts/trading-dashboard.js"></script>
+      
+        <script src="../javascripts/amortisation.js"></script>
       
     
   </body>

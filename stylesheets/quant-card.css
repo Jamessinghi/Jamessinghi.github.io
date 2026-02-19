@@ -522,3 +522,109 @@
   width: 120px;
   height: 80px;
 }
+/* === Amortisation Calculator === */
+.amort-wrap { margin-top: 1rem; }
+
+.amort-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 1000px) {
+  .amort-grid { grid-template-columns: 1fr; }
+}
+
+.amort-card {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 14px;
+  backdrop-filter: blur(6px);
+}
+
+.amort-card h3 { margin-top: 0; }
+
+.amort-card label {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.amort-card input,
+.amort-card select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.35);
+  color: inherit;
+  outline: none;
+}
+
+.amort-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.amort-summary {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  opacity: 0.95;
+}
+
+.amort-table-wrap {
+  max-height: 520px;         /* scroll like Excel */
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.amort-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.amort-table thead th {
+  position: sticky;           /* sticky header */
+  top: 0;
+  background: #ffffff;
+  z-index: 2;
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.amort-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  white-space: nowrap;
+}
+.full-width-row{
+  grid-column: 1 / -1;   /* if your layout is grid */
+  width: 100%;
+}
+.amort-card input,
+.amort-card select {
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 10px 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.amort-table th {
+  font-weight: 700;
+}
+.amort-card label {
+  font-weight: 700;
+}
+.amort-table th,
+.amort-table td {
+  border: 1px solid rgba(255,255,255,0.7);
+}
+.amort-fn-wrapper {
+  display: none;
+}
