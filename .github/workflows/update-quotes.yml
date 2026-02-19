@@ -33,6 +33,16 @@ jobs:
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
         run: python scripts/fetch_quotes_twelvedata.py
 
+      # ✅ DEBUG 1: print the file created on MAIN
+      - name: DEBUG - show generated quotes.json (main)
+        working-directory: main
+        run: |
+          echo "===== main/docs/assets/quotes.json ====="
+          ls -lah docs/assets || true
+          python -c "import json; p='docs/assets/quotes.json'; d=json.load(open(p)); print('keys:', list(d.keys())[:20]); print('AAPL:', d.get('AAPL'))"
+          echo "----- raw file -----"
+          cat docs/assets/quotes.json
+
       # 2) Checkout GH-PAGES (this is what your live site serves)
       - uses: actions/checkout@v4
         with:
@@ -45,6 +55,18 @@ jobs:
         run: |
           mkdir -p pages/assets
           cp main/docs/assets/quotes.json pages/assets/quotes.json
+
+      # ✅ DEBUG 2: show exactly what will be committed on GH-PAGES
+      - name: DEBUG - show gh-pages quotes.json before commit
+        run: |
+          echo "===== pages/assets/quotes.json ====="
+          ls -lah pages/assets || true
+          python -c "import json; p='pages/assets/quotes.json'; d=json.load(open(p)); print('keys:', list(d.keys())[:20]); print('AAPL:', d.get('AAPL'))"
+          echo "----- raw file -----"
+          cat pages/assets/quotes.json
+          echo "----- git diff (if any) -----"
+          cd pages
+          git diff -- assets/quotes.json || true
 
       # 4) Commit ONLY the live quotes.json (on gh-pages) if changed
       - name: Commit quotes.json if changed (gh-pages)
