@@ -31,17 +31,34 @@
   }
 
   // ---- Core schedule ----
-  function buildSchedule({ principalCents, annualRate, years, paymentsPerYear, extraCents, startDate }) {
+  // ✅ CHANGE: added fnMode param to control how fortnightly base payment is computed
+  function buildSchedule({ principalCents, annualRate, years, paymentsPerYear, extraCents, startDate, fnMode }) {
     const r = (annualRate / 100) / paymentsPerYear;
     const n = years * paymentsPerYear;
 
-    // payment formula (in cents)
-    const P = fromCents(principalCents);
-    const payment = r === 0
-      ? (P / n)
-      : (P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1));
+    // ✅ CHANGE: compute payment for any frequency (returns cents)
+    function computePaymentCents(freq) {
+      const rr = (annualRate / 100) / freq;
+      const nn = years * freq;
 
-    const paymentCents = toCents(payment);
+      const P = fromCents(principalCents);
+      const pay = rr === 0
+        ? (P / nn)
+        : (P * (rr * Math.pow(1 + rr, nn)) / (Math.pow(1 + rr, nn) - 1));
+
+      return toCents(pay);
+    }
+
+    // ✅ CHANGE: base payment differs for fortnightly depending on fnMode
+    let paymentCents;
+    if (paymentsPerYear === 26 && fnMode === "halfMonthly") {
+      // Bank-style: monthly payment ÷ 2
+      const monthlyPaymentCents = computePaymentCents(12);
+      paymentCents = Math.round(monthlyPaymentCents / 2);
+    } else {
+      // Default: true 26-pay formula (or monthly/weekly/etc)
+      paymentCents = computePaymentCents(paymentsPerYear);
+    }
 
     let balanceCents = principalCents;
     let date = new Date(startDate);
@@ -171,17 +188,17 @@
     // default start date = today
     const today = new Date();
     $("amort-start").value = today.toISOString().slice(0, 10);
-    // ✅ ADD THIS BLOCK (toggle fortnightly mode visibility)
+
+    // Toggle fortnightly mode visibility (keep your existing behaviour)
     function updateFnVisibility() {
-    const freq = Number($("amort-freq").value); // 12, 26, 52
-    const wrapper = $("amort-fn-wrapper");
-    if (!wrapper) return;
-
-    wrapper.style.display = (freq === 26) ? "block" : "none";
+      const freq = Number($("amort-freq").value); // 12, 26, 52
+      const wrapper = $("amort-fn-wrapper");
+      if (!wrapper) return;
+      wrapper.style.display = (freq === 26) ? "block" : "none";
     }
+    updateFnVisibility();
+    $("amort-freq").addEventListener("change", updateFnVisibility);
 
-  updateFnVisibility();
-  $("amort-freq").addEventListener("change", updateFnVisibility);
     let lastResult = null;
 
     $("amort-generate").addEventListener("click", () => {
@@ -192,7 +209,19 @@
       const extraCents = toCents($("amort-extra").value || 0);
       const startDate = $("amort-start").value;
 
-      const result = buildSchedule({ principalCents, annualRate, years, paymentsPerYear, extraCents, startDate });
+      // ✅ CHANGE: read fortnightly mode and pass into buildSchedule
+      const fnMode = $("amort-fn-mode") ? $("amort-fn-mode").value : "true26";
+
+      const result = buildSchedule({
+        principalCents,
+        annualRate,
+        years,
+        paymentsPerYear,
+        extraCents,
+        startDate,
+        fnMode // ✅ CHANGE
+      });
+
       lastResult = result;
 
       render(result.rows);
