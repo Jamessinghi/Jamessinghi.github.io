@@ -271,7 +271,7 @@ function initStockViz() {
       }
     } finally {
       btnEl.disabled = false;
-      btnEl.textContent = "Run valuation";
+      btnEl.textContent = "Run Projection";
     }
   }
 
