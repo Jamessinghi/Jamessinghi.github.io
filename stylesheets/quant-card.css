@@ -628,3 +628,134 @@
 .amort-fn-wrapper {
   display: none;
 }
+<style>
+  /* --- Match your "Interactive Data Visualisation" dark-glass vibe --- */
+  .stockviz-wrap {
+    margin: 28px auto;
+    max-width: 1150px;
+    padding: 0 18px;
+    font-family: inherit; /* inherits your existing font */
+  }
+  .stockviz-card {
+    border-radius: 22px;
+    background: rgba(50, 50, 50, 0.72);
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: rgba(255,255,255,0.92);
+    padding: 22px 22px 18px;
+  }
+  .stockviz-header h2 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .stockviz-sub {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.35;
+  }
+  .stockviz-sub code {
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.88);
+  }
+
+  .stockviz-controls {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+    margin-top: 10px;
+  }
+  @media (max-width: 850px) {
+    .stockviz-controls {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+  }
+
+  .stockviz-field label {
+    display: block;
+    font-size: 12px;
+    margin: 0 0 6px;
+    color: rgba(255,255,255,0.75);
+  }
+  .stockviz-field input,
+  .stockviz-field select {
+    width: 100%;
+    padding: 12px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.09);
+    color: rgba(255,255,255,0.92);
+    outline: none;
+  }
+  .stockviz-field input::placeholder {
+    color: rgba(255,255,255,0.5);
+  }
+  .stockviz-btn {
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.95);
+    cursor: pointer;
+    font-weight: 650;
+  }
+  .stockviz-btn:hover { background: rgba(255,255,255,0.16); }
+  .stockviz-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .stockviz-error {
+    grid-column: 1 / -1;
+    margin-top: 2px;
+    font-size: 13px;
+    color: rgba(255, 190, 190, 0.95);
+    min-height: 18px;
+  }
+
+  .stockviz-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  @media (max-width: 1100px) { .stockviz-stats { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .stockviz-stats { grid-template-columns: 1fr; } }
+
+  .stat {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.08);
+    padding: 12px 12px;
+  }
+  .stat-k {
+    font-size: 12px;
+    color: rgba(255,255,255,0.70);
+    margin-bottom: 6px;
+  }
+  .stat-v {
+    font-size: 18px;
+    font-weight: 750;
+    letter-spacing: 0.2px;
+  }
+
+  .stockviz-chart {
+    margin-top: 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.10);
+    padding: 14px 14px 10px;
+  }
+  .stockviz-footnote {
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+  }
+</style>
+

@@ -653,6 +653,70 @@
  </div>
 </div>
 
+<p><br></p>
+<section class="stockviz-wrap" id="stockViz">
+  <div class="stockviz-card">
+    <div class="stockviz-header">
+      <h2>Stock Projection (5Y History + 5Y Forecast)</h2>
+      <p class="stockviz-sub">
+        Enter <strong>EXCHANGE:TICKER</strong> (required) — e.g. <code>NASDAQ:AAPL</code>, <code>NYSE:TSLA</code>, <code>ASX:TPW</code>
+      </p>
+    </div>
+
+<div class="stockviz-controls">
+      <div class="stockviz-field">
+        <label for="stockSymbol">Symbol</label>
+        <input id="stockSymbol" type="text" placeholder="NASDAQ:AAPL" autocomplete="off" />
+      </div>
+
+<div class="stockviz-field">
+        <label for="confidence">Projection confidence</label>
+        <select id="confidence">
+          <option value="conservative">Conservative</option>
+          <option value="moderate" selected>Moderate</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+<button class="stockviz-btn" id="runStock">
+        Run valuation
+</button>
+
+<div class="stockviz-error" id="stockError" aria-live="polite"></div>
+</div>
+
+<div class="stockviz-stats" id="stockStats" style="display:none;">
+<div class="stat">
+        <div class="stat-k">Last price</div>
+        <div class="stat-v" id="statLast">—</div>
+</div>
+<div class="stat">
+        <div class="stat-k">% change</div>
+        <div class="stat-v" id="statChg">—</div>
+</div>
+<div class="stat">
+        <div class="stat-k">P/E ratio</div>
+        <div class="stat-v" id="statPE">—</div>
+</div>
+<div class="stat">
+        <div class="stat-k">1Y % performance</div>
+        <div class="stat-v" id="stat1Y">—</div>
+</div>
+<div class="stat">
+        <div class="stat-k">5Y % performance</div>
+        <div class="stat-v" id="stat5Y">—</div>
+      </div>
+</div>
+
+<div class="stockviz-chart">
+      <canvas id="stockChart" width="900" height="360"></canvas>
+      <div class="stockviz-footnote">
+        Solid line = last 5 years. Dashed line = projected next 5 years (confidence-adjusted).
+      </div>
+</div>
+</div>
+</section>
+
 
 
 
@@ -744,6 +808,8 @@
         <script src="../javascripts/trading-dashboard.js"></script>
       
         <script src="../javascripts/amortisation.js"></script>
+      
+        <script src="../javascripts/stockviz.js"></script>
       
     
   </body>
