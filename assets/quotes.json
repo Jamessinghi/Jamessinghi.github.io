@@ -1,5 +1,5 @@
 {
-  "updated_at_utc": "2026-05-30T07:50:21Z",
+  "updated_at_utc": "2026-05-30T10:16:28Z",
   "source": "twelvedata",
   "AAPL": {
     "price": 312.059998,
@@ -22,7 +22,7 @@
     "prev_close": 274.0
   },
   "TSLA": {
-    "price": 435.56,
+    "price": 435.79001,
     "prev_close": 442.10001
   },
   "META": {
