@@ -1,36 +1,36 @@
 {
-  "updated_at_utc": "2026-07-14T11:42:58Z",
+  "updated_at_utc": "2026-07-14T14:12:20Z",
   "source": "twelvedata",
   "AAPL": {
-    "price": 317.31,
-    "prev_close": 315.32001
+    "price": 314.065,
+    "prev_close": 317.31
   },
   "MSFT": {
-    "price": 390.98999,
-    "prev_close": 385.10001
+    "price": 383.465,
+    "prev_close": 390.98999
   },
   "NVDA": {
-    "price": 203.53,
-    "prev_close": 210.96001
+    "price": 204.59,
+    "prev_close": 203.53
   },
   "GOOGL": {
-    "price": 352.51001,
-    "prev_close": 357.17999
+    "price": 353.99,
+    "prev_close": 352.51001
   },
   "AMZN": {
-    "price": 247.31,
-    "prev_close": 245.34
+    "price": 245.33,
+    "prev_close": 247.31
   },
   "TSLA": {
-    "price": 394.76001,
-    "prev_close": 407.76001
+    "price": 398.46,
+    "prev_close": 394.76001
   },
   "META": {
-    "price": 656.72998,
-    "prev_close": 669.21002
+    "price": 657.48,
+    "prev_close": 656.72998
   },
   "AMD": {
-    "price": 534.39001,
-    "prev_close": 557.89001
+    "price": 552.83,
+    "prev_close": 534.39001
   }
 }
