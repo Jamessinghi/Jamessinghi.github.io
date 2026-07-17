@@ -352,7 +352,7 @@ body.glass-header.header-skin--image::before { content: none !important; display
 /* The actual glass effect */
 body.glass-header .md-header,
 body.glass-header .md-tabs {
-  background: rgba(8, 22, 12, 0.88) !important;
+  background: rgb(8, 22, 12) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   border-bottom: 1px solid rgba(255,255,255,0.14) !important;

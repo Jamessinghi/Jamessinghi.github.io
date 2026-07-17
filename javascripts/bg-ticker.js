@@ -59,10 +59,10 @@
 
   // === CONFIGURATION =========================================================
   const USE_DARK_CONTENT = true;       // makes page text white on dark
-  const MIN_SPEED = 40;                // px/sec
-  const MAX_SPEED = 110;
+  const MIN_SPEED = 28;                // px/sec
+  const MAX_SPEED = 70;
   const BASE_FONT_PX = 16;
-  const LINE_HEIGHT  = 1.35;
+  const LINE_HEIGHT  = 1.6;
   const FONT_FAMILY  = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 
   // Colors
@@ -89,10 +89,6 @@
   const RADIUS_PX   = 10;              // rounded corners for the cover
   const FEATHER_OPACITY = 1;           // fully isolate content from moving ticker pixels
 
-  // Limit full-canvas redraws to reduce compositor pressure and battery use.
-  const TARGET_FPS = 30;
-  const FRAME_INTERVAL = 1000 / TARGET_FPS;
-
   // === CANVAS SETUP ==========================================================
   const canvas = document.createElement('canvas');
   canvas.id = 'ticker-bg';
@@ -110,9 +106,10 @@
   const ctx = canvas.getContext('2d', { alpha: false });
 
   // === STATE ================================================================
-  let DPR = Math.max(1, Math.min(1.5, window.devicePixelRatio || 1));
+  let DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
   let W = 0, H = 0;
   let fontPx = 0, lineGap = 0;
+  let backgroundGradient = null;
   let rows = [];
   let running = true;
   let stock = TICKERS.map(sym => ({ sym, price: seedPrice(sym), prev: null }));
@@ -166,12 +163,50 @@
     const x     = -Math.random() * (W * 0.75);
     if (type === 'code') {
       const text = buildCodeString(W * 1.5);
-      return { y, x, speed, type, text, width: ctx.measureText(text).width };
+      const row = { y, x, speed, type, text, width: ctx.measureText(text).width };
+      cacheRow(row);
+      return row;
     } else {
       const parts = buildStockSegments();
       const width = parts.reduce((a, s) => a + ctx.measureText(s.text).width, 0);
-      return { y, x, speed, type, parts, width };
+      const row = { y, x, speed, type, parts, width };
+      cacheRow(row);
+      return row;
     }
+  }
+
+  // Render each complete row once. The animation loop can then composite one
+  // bitmap per row instead of measuring and painting every segment every frame.
+  function cacheRow(row) {
+    const padding = Math.max(2, Math.ceil(2 * DPR));
+    const bitmap = typeof OffscreenCanvas === 'function'
+      ? new OffscreenCanvas(Math.ceil(row.width + padding * 2), Math.ceil(lineGap * 1.25))
+      : document.createElement('canvas');
+
+    bitmap.width = Math.ceil(row.width + padding * 2);
+    bitmap.height = Math.ceil(lineGap * 1.25);
+
+    const bitmapCtx = bitmap.getContext('2d', { alpha: true });
+    bitmapCtx.font = ctx.font;
+    bitmapCtx.textBaseline = 'alphabetic';
+    bitmapCtx.imageSmoothingEnabled = false;
+
+    const baseline = fontPx;
+    if (row.type === 'code') {
+      bitmapCtx.fillStyle = COLOR_CODE;
+      bitmapCtx.fillText(row.text, padding, baseline);
+    } else {
+      let dx = padding;
+      row.parts.forEach(segment => {
+        bitmapCtx.fillStyle = segment.color;
+        bitmapCtx.fillText(segment.text, dx, baseline);
+        dx += bitmapCtx.measureText(segment.text).width;
+      });
+    }
+
+    row.bitmap = bitmap;
+    row.bitmapPadding = padding;
+    row.bitmapBaseline = baseline;
   }
 
   // ---------- Utility: build rounded rectangle path (device pixels) ----------
@@ -275,7 +310,7 @@
 
   // ---------- Fit canvas to viewport + rebuild rows --------------------------
   function fit() {
-    DPR = Math.max(1, Math.min(1.5, window.devicePixelRatio || 1));
+    DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
     const cssW = window.innerWidth, cssH = window.innerHeight;
 
     canvas.width  = Math.floor(cssW * DPR);
@@ -290,6 +325,11 @@
     ctx.shadowColor = SHADOW_COLOR;
     ctx.shadowBlur  = SHADOW_BLUR;
     ctx.imageSmoothingEnabled = false;
+
+    backgroundGradient = ctx.createLinearGradient(0, 0, 0, H);
+    backgroundGradient.addColorStop(0, WASH_TOP);
+    backgroundGradient.addColorStop(0.5, WASH_MID);
+    backgroundGradient.addColorStop(1, WASH_BOTTOM);
 
     lineGap = Math.floor(fontPx * LINE_HEIGHT);
     rows = [];
@@ -315,45 +355,31 @@
   function tick(now) {
     if (!running) return;
 
-    const elapsed = now - last;
-    if (elapsed < FRAME_INTERVAL) {
-      requestAnimationFrame(tick);
-      return;
-    }
+    const dt = Math.min((now - last) / 1000, 0.1);
+    last = now;
 
-    const dt = Math.min(elapsed / 1000, 0.1);
-    last = now - (elapsed % FRAME_INTERVAL);
-
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, WASH_TOP);
-    g.addColorStop(0.5, WASH_MID);
-    g.addColorStop(1, WASH_BOTTOM);
-    ctx.fillStyle = g;
+    ctx.fillStyle = backgroundGradient;
     ctx.fillRect(0, 0, W, H);
 
     rows.forEach(row => {
       row.x += row.speed * DPR * dt;
-      const sx = Math.round(row.x);
+      const sx = row.x;
 
       if (row.type === 'code') {
-        ctx.fillStyle = COLOR_CODE;
-        ctx.fillText(row.text, sx, row.y);
+        ctx.drawImage(row.bitmap, sx - row.bitmapPadding, row.y - row.bitmapBaseline);
         if (row.x > W + 50 * DPR) {
           row.text  = buildCodeString(W * 1.5);
           row.width = ctx.measureText(row.text).width;
           row.x     = -row.width - 50 * DPR;
+          cacheRow(row);
         }
       } else {
-        let dx = sx;
-        row.parts.forEach(seg => {
-          ctx.fillStyle = seg.color;
-          ctx.fillText(seg.text, dx, row.y);
-          dx += ctx.measureText(seg.text).width;
-        });
+        ctx.drawImage(row.bitmap, sx - row.bitmapPadding, row.y - row.bitmapBaseline);
         if (row.x > W + 50 * DPR) {
           row.parts = buildStockSegments();
           row.width = row.parts.reduce((a, s) => a + ctx.measureText(s.text).width, 0);
           row.x = -row.width - 50 * DPR;
+          cacheRow(row);
         }
       }
     });
@@ -426,6 +452,7 @@
         if (r.type === 'stock') {
           r.parts = buildStockSegments();
           r.width = r.parts.reduce((a, s) => a + ctx.measureText(s.text).width, 0);
+          cacheRow(r);
         }
       });
     }

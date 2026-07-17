@@ -177,8 +177,9 @@ The header and navigation tabs use sticky positioning. The title row remains at 
 
 The ticker animation includes several safeguards:
 
-- Canvas resolution is capped at a device-pixel ratio of `1.5`.
-- Rendering is limited to 30 frames per second.
+- Canvas resolution matches the display density up to a device-pixel ratio of `2`.
+- Rendering follows the browser's native animation-frame cadence for smooth motion.
+- Ticker rows are pre-rendered and composited as cached bitmaps instead of repainting each text segment every frame.
 - The canvas uses synchronized presentation to avoid compositor tearing.
 - Expensive header backdrop filtering is disabled.
 - Animation timing is reset when tab visibility changes.
