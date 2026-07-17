@@ -99,6 +99,7 @@ The page-aware background loader chooses an animation based on the current route
 │   └── quant-card.css             # Project cards, dashboards, and calculators
 ├── search/                        # Generated search index
 ├── sitemap.xml                    # Search-engine sitemap
+├── .github/workflows/pages.yml    # GitHub Pages deployment workflow
 └── .nojekyll                      # Disables Jekyll processing on GitHub Pages
 ```
 
@@ -188,20 +189,19 @@ The ticker animation includes several safeguards:
 
 ## Deployment
 
-GitHub Pages serves the static files from the `gh-pages` branch. The `main` and `gh-pages` branches are maintained with matching file trees so the default branch accurately represents the deployed website.
+The `main` branch is the single source of truth. Every push to `main` runs `.github/workflows/pages.yml`, packages the static repository, and deploys it through GitHub Pages Actions. The workflow can also be started manually from the repository's Actions tab.
 
-Before publishing, verify:
+Before publishing, verify the modified scripts and working tree:
 
 ```bash
-git diff --exit-code gh-pages..main
 node --check javascripts/bg-ticker.js
+git diff --check
 ```
 
-Publish both branches:
+Publish the site:
 
 ```bash
 git push origin main
-git push origin gh-pages
 ```
 
 After pushing, GitHub Pages may take a few minutes to refresh.
@@ -216,8 +216,8 @@ After pushing, GitHub Pages may take a few minutes to refresh.
 6. Confirm dashboard metric labels and values remain inside their cards.
 7. Test with reduced motion enabled.
 8. Syntax-check modified JavaScript.
-9. Apply the same final file tree to `main` and `gh-pages`.
-10. Commit and push both branches.
+9. Commit and push `main`.
+10. Confirm the `Deploy GitHub Pages` workflow succeeds.
 
 ## Troubleshooting
 
@@ -239,4 +239,4 @@ Confirm metric cards use `box-sizing: border-box` and that `.metric .m-k` remain
 
 ### GitHub Pages shows an older version
 
-Verify that the updated commit reached `origin/gh-pages`, then check the repository's Pages settings and deployment status. A hard refresh may be required after deployment completes.
+Confirm the latest `Deploy GitHub Pages` workflow completed successfully, then check the repository's Pages settings and deployment status. A hard refresh may be required after deployment completes.
