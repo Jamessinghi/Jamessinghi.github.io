@@ -29,6 +29,11 @@
   margin: auto;
 }
 
+/* Remove the generated theme attribution while keeping footer social links. */
+.md-copyright {
+  display: none !important;
+}
+
 /* Optional: center main title */
 h1, h2, h3 {
   text-align: center;
