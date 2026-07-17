@@ -87,7 +87,11 @@
   // Fade-under-content configuration
   const ENABLE_FADE_COVER = true;      // draw a cover over content instead of cutting a hole
   const RADIUS_PX   = 10;              // rounded corners for the cover
-  const FEATHER_OPACITY = 0.92;        // 0–1: how strongly we fade the ticker under content
+  const FEATHER_OPACITY = 1;           // fully isolate content from moving ticker pixels
+
+  // Limit full-canvas redraws to reduce compositor pressure and battery use.
+  const TARGET_FPS = 30;
+  const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
   // === CANVAS SETUP ==========================================================
   const canvas = document.createElement('canvas');
@@ -103,10 +107,10 @@
   document.body.prepend(canvas);
 
   // Opaque canvas: we paint *over* the ticker to fade, never punch through
-  const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+  const ctx = canvas.getContext('2d', { alpha: false });
 
   // === STATE ================================================================
-  let DPR = Math.max(1, Math.min(2.5, window.devicePixelRatio || 1));
+  let DPR = Math.max(1, Math.min(1.5, window.devicePixelRatio || 1));
   let W = 0, H = 0;
   let fontPx = 0, lineGap = 0;
   let rows = [];
@@ -270,7 +274,7 @@
 
   // ---------- Fit canvas to viewport + rebuild rows --------------------------
   function fit() {
-    DPR = Math.max(1, Math.min(2.5, window.devicePixelRatio || 1));
+    DPR = Math.max(1, Math.min(1.5, window.devicePixelRatio || 1));
     const cssW = window.innerWidth, cssH = window.innerHeight;
 
     canvas.width  = Math.floor(cssW * DPR);
@@ -308,8 +312,14 @@
   // ---------- Animation loop -------------------------------------------------
   let last = performance.now();
   function tick(now) {
-    const dt = (now - last) / 1000;
-    last = now;
+    const elapsed = now - last;
+    if (elapsed < FRAME_INTERVAL) {
+      requestAnimationFrame(tick);
+      return;
+    }
+
+    const dt = Math.min(elapsed / 1000, 0.1);
+    last = now - (elapsed % FRAME_INTERVAL);
 
     const g = ctx.createLinearGradient(0, 0, 0, H);
     g.addColorStop(0, WASH_TOP);
