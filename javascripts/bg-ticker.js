@@ -86,7 +86,7 @@
 
   // Fade-under-content configuration
   const ENABLE_FADE_COVER = true;      // draw a cover over content instead of cutting a hole
-  const RADIUS_PX   = 10;              // rounded corners for the cover
+  const RADIUS_PX   = 28;              // softer rounded corners for the content cover
   const FEATHER_OPACITY = 1;           // fully isolate content from moving ticker pixels
 
   // === CANVAS SETUP ==========================================================
