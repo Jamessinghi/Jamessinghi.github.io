@@ -114,6 +114,7 @@
   let W = 0, H = 0;
   let fontPx = 0, lineGap = 0;
   let rows = [];
+  let running = true;
   let stock = TICKERS.map(sym => ({ sym, price: seedPrice(sym), prev: null }));
   let quotesMeta = { updated_at_utc: null };
   let HAS_REAL_QUOTES = false;
@@ -312,6 +313,8 @@
   // ---------- Animation loop -------------------------------------------------
   let last = performance.now();
   function tick(now) {
+    if (!running) return;
+
     const elapsed = now - last;
     if (elapsed < FRAME_INTERVAL) {
       requestAnimationFrame(tick);
@@ -363,16 +366,31 @@
   // Helpers
   function lerp(a, b, t) { return a + (b - a) * t; }
 
-  document.addEventListener('visibilitychange', () => { last = performance.now(); });
+  function handleVisibilityChange() { last = performance.now(); }
+  function handleResize() { fit(); computeCoverArea(); }
 
-  window.addEventListener('resize', () => { fit(); computeCoverArea(); }, { passive: true });
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  window.addEventListener('resize', handleResize, { passive: true });
   window.addEventListener('load',  () => { computeCoverArea(); }, { once: true });
+
+  window.__tickerBackground = {
+    destroy() {
+      running = false;
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      canvas.remove();
+      document.getElementById('quote-timestamp')?.remove();
+      document.documentElement.classList.remove('ticker-dark');
+      if (window.__tickerBackground === this) delete window.__tickerBackground;
+    }
+  };
 
   // Boot (fit first so rows exist, then load quotes, then refresh stock rows)
   (async () => {
     fit();
 
     const quotes = await loadQuotes();
+    if (!running) return;
     if (quotes) {
       HAS_REAL_QUOTES = true;
       quotesMeta.updated_at_utc = quotes.updated_at_utc || null;

@@ -243,5 +243,12 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", boot);
+  if (window.document$ && typeof window.document$.subscribe === "function") {
+    window.document$.subscribe(boot);
+  } else if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
+  window.addEventListener("app-shell:navigate", boot);
 })();

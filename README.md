@@ -37,6 +37,7 @@ No application server, database, package installation, or compilation step is re
 ## Features
 
 - Responsive portfolio navigation and search
+- Persistent client-side app shell with prefetched, reload-free tab navigation
 - Sticky two-row header that remains visible while scrolling
 - Animated stock-ticker background on the Home and Contact pages
 - Animated bubble background on the Projects and Resume pages
@@ -55,6 +56,8 @@ The site uses four primary layers:
 2. **Theme assets** — bundled Material stylesheets, search scripts, and search index.
 3. **Custom presentation** — `stylesheets/extra.css` and `stylesheets/quant-card.css`.
 4. **Interactive behavior** — scripts in `javascripts/` and JSON data in `assets/`.
+
+`javascripts/app-shell.js` keeps the shared header and JavaScript runtime mounted while navigating between tabs. It prefetches the four page documents, replaces only the Material page container, updates browser history and the document title, and emits an `app-shell:navigate` event so page-specific components can initialize without a full reload. Direct links and browser back/forward navigation continue to work normally.
 
 The page-aware background loader chooses an animation based on the current route:
 
@@ -84,6 +87,7 @@ The page-aware background loader chooses an animation based on the current route
 │   └── *.pdf                      # Resume and supporting documents
 ├── javascripts/
 │   ├── bg-loader.js               # Selects the background for each page
+│   ├── app-shell.js               # Reload-free navigation and page prefetching
 │   ├── bg-ticker.js               # Animated stock ticker canvas
 │   ├── bg-bubbles.js              # Animated SVG bubble field
 │   ├── header-skin.js             # Page-specific header appearance
@@ -207,11 +211,12 @@ After pushing, GitHub Pages may take a few minutes to refresh.
 2. Make the required HTML, CSS, JavaScript, asset, or data changes.
 3. Test Home, Projects, Resume, and Contact at desktop and mobile widths.
 4. Confirm the sticky header remains visible during scrolling.
-5. Confirm dashboard metric labels and values remain inside their cards.
-6. Test with reduced motion enabled.
-7. Syntax-check modified JavaScript.
-8. Apply the same final file tree to `main` and `gh-pages`.
-9. Commit and push both branches.
+5. Navigate through every tab and use browser back/forward to verify app-shell routing.
+6. Confirm dashboard metric labels and values remain inside their cards.
+7. Test with reduced motion enabled.
+8. Syntax-check modified JavaScript.
+9. Apply the same final file tree to `main` and `gh-pages`.
+10. Commit and push both branches.
 
 ## Troubleshooting
 

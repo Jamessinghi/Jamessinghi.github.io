@@ -51,4 +51,5 @@
   }
 
   window.addEventListener("popstate", applySkin);
+  window.addEventListener("app-shell:navigate", applySkin);
 })();

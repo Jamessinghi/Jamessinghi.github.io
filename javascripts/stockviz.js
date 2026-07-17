@@ -296,10 +296,11 @@ function initStockViz() {
   // console.log("StockViz bound");
 }
 
-// Normal load
-document.addEventListener("DOMContentLoaded", initStockViz);
-
-// MkDocs Material navigation support (SPA)
 if (window.document$ && typeof window.document$.subscribe === "function") {
-  window.document$.subscribe(() => initStockViz());
+  window.document$.subscribe(initStockViz);
+} else if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initStockViz, { once: true });
+} else {
+  initStockViz();
 }
+window.addEventListener("app-shell:navigate", initStockViz);

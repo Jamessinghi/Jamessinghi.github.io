@@ -186,4 +186,11 @@ async function initDashboard() {
   update();
 }
 
-document.addEventListener("DOMContentLoaded", initDashboard);
+if (window.document$ && typeof window.document$.subscribe === "function") {
+  window.document$.subscribe(initDashboard);
+} else if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initDashboard, { once: true });
+} else {
+  initDashboard();
+}
+window.addEventListener("app-shell:navigate", initDashboard);

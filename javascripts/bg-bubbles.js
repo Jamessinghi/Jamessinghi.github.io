@@ -119,6 +119,7 @@
 
   // Main animation loop (single rAF)
   let running = true;
+  let destroyed = false;
   let start = performance.now();
 
   function tick(now) {
@@ -154,17 +155,30 @@
   }
 
   // Pause when hidden
-  document.addEventListener('visibilitychange', () => {
+  function handleVisibilityChange() {
+    if (destroyed) return;
     const wasRunning = running;
     running = !document.hidden;
     if (!wasRunning && running) {
       start = performance.now();
       requestAnimationFrame(tick);
     }
-  });
+  }
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
 
   // Init
   window.addEventListener('resize', onResize, { passive: true });
+  window.__bubblesBackground = {
+    destroy() {
+      destroyed = true;
+      running = false;
+      window.removeEventListener('resize', onResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      svg.remove();
+      if (window.__bubblesBackground === this) delete window.__bubblesBackground;
+    }
+  };
   onResize();
   requestAnimationFrame(tick);
 })();

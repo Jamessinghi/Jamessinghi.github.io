@@ -7,8 +7,7 @@
    ========================================================================== */
 
 (function () {
-  // Respect reduced-motion at the loader level, so we never inject animations.
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   // Helper: get the last non-empty segment of the current path
   // Examples:
@@ -23,14 +22,6 @@
     return last.replace(/\.html?$/i, '') || 'index';
   }
 
-  // Decide target by slug
-  const slug = lastSegment().toLowerCase();
-
-  // Map slugs → background type
-  // Keep Home and Contact on ticker; Projects & Resume on bubbles.
-  const USE_BUBBLES = (slug === 'projects' || slug === 'resume');
-  const USE_TICKER  = (slug === 'index'    || slug === 'contact');
-
   // Resolve the correct base URL for this site (works locally and on GH Pages).
   // We infer the folder that bg-loader.js was served from, then build sibling URLs.
   const here = document.currentScript && document.currentScript.src
@@ -40,30 +31,48 @@
   const base = new URL('.', here).href; // directory containing bg-loader.js
 
   // Inject a script tag for the chosen background file
-  function inject(relativePath) {
+  function inject(relativePath, marker) {
+    if (document.querySelector(`script[data-background-script="${marker}"]`)) return;
     const url = new URL(relativePath, base).href;
     const s = document.createElement('script');
     s.src = url;
     s.async = true;
+    s.dataset.backgroundScript = marker;
     // If a file fails to load, fail silently (we don’t want to break the page).
     s.onerror = () => console.warn('[bg-loader] failed to load', url);
     document.head.appendChild(s);
   }
 
-  if (USE_BUBBLES) {
-    // Only inject if not already present
-    if (!document.getElementById('bg-bubbles')) {
-      inject('bg-bubbles.js');
+  function removeScript(marker) {
+    document.querySelector(`script[data-background-script="${marker}"]`)?.remove();
+  }
+
+  function applyBackground() {
+    if (reducedMotion.matches) {
+      window.__tickerBackground?.destroy();
+      window.__bubblesBackground?.destroy();
+      return;
     }
-  } else if (USE_TICKER) {
-    if (!document.getElementById('ticker-bg')) {
-      inject('bg-ticker.js');
-    }
-  } else {
-    // For any other pages you add later, pick a default.
-    // Defaulting to ticker keeps the overall look consistent.
-    if (!document.getElementById('ticker-bg')) {
-      inject('bg-ticker.js');
+
+    const slug = lastSegment().toLowerCase();
+    const useBubbles = slug === 'projects' || slug === 'resume';
+
+    if (useBubbles) {
+      window.__tickerBackground?.destroy();
+      removeScript('ticker');
+      if (!document.getElementById('bg-bubbles')) inject('bg-bubbles.js', 'bubbles');
+    } else {
+      window.__bubblesBackground?.destroy();
+      removeScript('bubbles');
+      if (!document.getElementById('ticker-bg')) inject('bg-ticker.js', 'ticker');
     }
   }
+
+  applyBackground();
+  reducedMotion.addEventListener('change', applyBackground);
+
+  if (window.document$ && typeof window.document$.subscribe === 'function') {
+    window.document$.subscribe(applyBackground);
+  }
+  window.addEventListener('app-shell:navigate', applyBackground);
 })();
