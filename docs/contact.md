@@ -1,2 +1,0 @@
-- 📧 Email: jamessinghi@hotmail.com
-- 💼 LinkedIn: www.linkedin.com/in/james-singhi-147768276

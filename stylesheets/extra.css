@@ -1,0 +1,389 @@
+/* === Custom styling for James Singhi Personal Website === */
+
+/* Make headers slightly bolder */
+.md-typeset h1 {
+  font-weight: 800;
+}
+
+/* Adjust code block background if needed */
+.md-typeset code {
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+
+/* Slight spacing improvement for lists */
+.md-typeset ul, .md-typeset ol {
+  margin-top: 0.4em;
+  margin-bottom: 0.8em;
+}
+
+/* Add subtle hover color to navigation links */
+.md-nav__link:hover {
+  color: #3f51b5;
+}
+
+/* Optional: tweak main content width */
+.md-content {
+  max-width: 900px;
+  margin: auto;
+}
+
+/* Optional: center main title */
+h1, h2, h3 {
+  text-align: center;
+}
+/* === Force top navigation tabs to always show === */
+@media screen and (max-width: 1220px) {
+  .md-tabs {
+    display: flex !important;           /* Keep showing the tabs */
+    overflow-x: auto;                   /* Scroll if too many tabs */
+    white-space: nowrap;
+  }
+
+  .md-header__inner {
+    flex-wrap: wrap;                    /* Prevent layout breaking */
+  }
+
+  .md-tabs__link {
+    font-size: 0.85rem;                 /* Slightly smaller text on narrow screens */
+    padding: 0.5em 1em;
+  }
+}
+
+/* === Pastel Bubble Background support (for bg-bubbles.js) ================= */
+
+/* Ensure page content sits above the background SVG and stays transparent. */
+html, body, .md-main, .md-content, .md-typeset {
+  position: relative;                /* create a stacking context */
+  z-index: 1;                        /* above the background (#bg-bubbles has z=0) */
+  background: transparent !important;/* avoid any opaque body background */
+}
+
+/* The shared keyframe used by all bubbles.
+   Each circle has its own --dx / --dy set from JS for unique drift. */
+@keyframes bubble-drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(var(--dx), var(--dy)); }
+}
+
+/* Prefer reduced motion: hide the SVG entirely. */
+@media (prefers-reduced-motion: reduce) {
+  #bg-bubbles { display: none !important; }
+}
+/* Improve transform performance for the animated bubbles */
+#bg-bubbles circle {
+  will-change: transform; /* hint GPU acceleration */
+}
+
+/* Help the browser allocate GPU resources wisely */
+#bg-bubbles circle { will-change: transform; }
+
+/* Canvas is already fast, but this keeps it composited efficiently */
+#matrix-bg { contain: strict; }
+
+/* docs/stylesheets/extra.css */
+#ticker-bg {
+  contain: strict;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Light text when the ticker asks for dark content */
+.ticker-dark body,
+.ticker-dark .md-content,
+.ticker-dark .md-typeset {
+  color: #eef6ef !important;             /* soft white-green */
+}
+
+.ticker-dark .md-typeset h1,
+.ticker-dark .md-typeset h2,
+.ticker-dark .md-typeset h3 {
+  color: #ffffff !important;             /* brighter for headings */
+  font-weight: 800;                      /* bolder */
+}
+
+/* Links: brighter green with underline on hover for accessibility */
+.ticker-dark a { color: #8fe3b0; }
+.ticker-dark a:hover { text-decoration: underline; }
+
+/* --- Remove the white "Home" chip/breadcrumb anywhere it appears in content --- */
+
+/* Hide breadcrumbs/chips no matter which variant Material uses */
+nav[aria-label="breadcrumbs"],
+.md-breadcrumbs {
+  display: none !important;
+}
+
+/* If a chip-like nav is used instead of breadcrumbs, nuke its card styling */
+.md-nav--primary,
+.md-nav--primary .md-nav__title,
+.md-nav--primary .md-nav__link,
+.md-breadcrumbs,
+.md-breadcrumbs__item,
+.md-breadcrumbs__link {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+/* Also remove any focus/elevation highlight that can create a white box */
+.md-nav__link:focus,
+.md-nav__link:focus-visible,
+.md-breadcrumbs__link:focus,
+.md-breadcrumbs__link:focus-visible {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Safety: if your build uses the chip-style primary nav inside content, hide it too */
+.md-content__inner .md-nav--primary {
+  display: none !important;
+}
+/* === Make Material's content card transparent so the canvas hole doesn't reveal a white box === */
+.md-main,
+.md-main__inner,
+.md-content,
+.md-content__inner,
+.md-typeset {
+  background: transparent !important;   /* kill the card/background */
+  box-shadow: none !important;          /* remove elevation */
+}
+
+/* Some Material builds paint the card via a pseudo-element — nuke that too */
+.md-content__inner::before,
+.md-content__inner::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Keep text readable on the dark ticker background */
+.ticker-dark .md-content,
+.ticker-dark .md-typeset {
+  color: #eef6ef !important;
+}
+.ticker-dark .md-typeset h1,
+.ticker-dark .md-typeset h2,
+.ticker-dark .md-typeset h3 {
+  color: #ffffff !important;
+}
+/* === Kill all default white content backgrounds revealed through the canvas === */
+.md-main,
+.md-main__inner,
+.md-content,
+.md-content__inner,
+.md-content__inner::before,
+.md-content__inner::after,
+.md-typeset,
+.md-typeset::before,
+.md-typeset::after {
+  background: transparent !important; /* force transparency */
+  box-shadow: none !important;        /* remove card elevation */
+  border: none !important;
+  filter: none !important;
+}
+
+/* Remove any Material pseudo-element shading or overlays */
+.md-main::before,
+.md-main::after,
+.md-main__inner::before,
+.md-main__inner::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Reinforce text visibility on dark background */
+body.ticker-dark,
+.ticker-dark .md-content,
+.ticker-dark .md-typeset {
+  color: #eef6ef !important;
+}
+.ticker-dark .md-typeset h1,
+.ticker-dark .md-typeset h2,
+.ticker-dark .md-typeset h3 {
+  color: #ffffff !important;
+}
+/* === One continuous header background (exactly like the purple bar) ===== */
+
+/* Make the real header rows transparent so the art shows through */
+.md-header,
+.md-tabs {
+  background: transparent !important;
+}
+
+/* Root for variables + defaults */
+body.header-skin--image {
+  --header-skin-image: none;
+  /* Material exposes --md-header-height; use it and fall back to ~100px */
+  --header-total-height: calc(
+  var(--md-header-height, 2.5rem) +
+  var(--md-tabs-height, 2.5rem)
+);
+}
+
+/* Keep the header rows clickable above the strip */
+.md-header,
+.md-tabs {
+  position: relative;
+  z-index: 2;
+}
+
+/* Pick which PNG to use per page */
+body.header-skin--green { --header-skin-image: url("../assets/header-bar-green.png"); }
+body.header-skin--black { --header-skin-image: url("../assets/header-bar-black.png"); }
+
+/* === Remove in-page breadcrumb ("Home") completely ===================== */
+
+/* Standard breadcrumb nav */
+.md-breadcrumbs,
+nav[aria-label="breadcrumbs"] {
+  display: none !important;
+}
+
+/* Some builds inject it inside content */
+.md-content__inner > nav:first-of-type {
+  display: none !important;
+}
+
+/* Safety: kill any leftover breadcrumb links */
+.md-breadcrumbs__link,
+.md-breadcrumbs__item {
+  display: none !important;
+}
+
+/* === Remove the in-page "Home" breadcrumb / page path (ALL Material variants) === */
+
+.md-breadcrumbs,
+.md-breadcrumbs__list,
+.md-breadcrumbs__item,
+.md-breadcrumbs__link,
+nav[aria-label="breadcrumbs"],
+nav.md-breadcrumbs,
+nav.md-path {
+  display: none !important;
+}
+
+/* Page-path row Material injects above content */
+.md-content__inner > .md-path,
+.md-content__inner > nav.md-path,
+.md-content__inner > nav[aria-label="breadcrumbs"],
+.md-content__inner > nav:first-child {
+  display: none !important;
+}
+
+/* Safety: breadcrumb rendered inside article wrapper */
+.md-article .md-path,
+.md-article nav[aria-label="breadcrumbs"] {
+  display: none !important;
+}
+/* === Fix the floating blue "Home" (it's the left sidebar link) === */
+/* Hide sidebars so nothing can "leak" through transparent backgrounds */
+.md-sidebar--primary,
+.md-sidebar--secondary {
+  display: none !important;
+}
+
+/* Re-center the main page since sidebars are gone */
+.md-main__inner {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  justify-content: center !important;
+}
+
+/* Ensure content stays centered */
+.md-content {
+  max-width: 900px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+/* To remove the white nav bar provided with mkdocs : It worked because Material injects the page path (“Home”) as a breadcrumb/nav element
+inside the content, not as part of the header, and your final selectors targeted all of Material’s breadcrumb/path variants at the exact DOM
+level where they’re inserted. By explicitly hiding those injected nav nodes after the theme renders (and not touching the header or tabs),
+you removed the blue “Home” without affecting layout, routing, or background stacking.*/
+
+/* =========================
+   HEADER BACKGROUNDS
+   ========================= */
+
+/* Keep both navigation rows visible inside the fixed header artwork. */
+.md-header {
+  position: sticky;
+  top: 0;
+  z-index: 11;
+}
+
+.md-tabs {
+  position: sticky;
+  top: var(--md-header-height, 2.5rem);
+  z-index: 10;
+}
+
+/* PNG strip for non-glass pages (Projects/Resume) */
+body.header-skin--image::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: calc(var(--md-header-height, 2.5rem) + var(--md-tabs-height, 2.5rem));
+  background-image:
+    linear-gradient(to bottom, rgba(0,0,0,.10), rgba(0,0,0,.00)),
+    var(--header-skin-image);
+  background-size: cover;
+  background-position: center;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* choose PNGs */
+body.header-skin--green { --header-skin-image: url("../assets/header-bar-green.png"); }
+body.header-skin--black { --header-skin-image: url("../assets/header-bar-black.png"); }
+
+/* =========================
+   GLASS (Home + Contact only)
+   ========================= */
+
+body.glass-header::before { content: none !important; display: none !important; }
+body.glass-header.header-skin--image::before { content: none !important; display: none !important; }
+
+/* The actual glass effect */
+body.glass-header .md-header,
+body.glass-header .md-tabs {
+  background: rgba(8, 22, 12, 0.88) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border-bottom: 1px solid rgba(255,255,255,0.14) !important;
+  box-shadow: 0 12px 34px rgba(0,0,0,0.30) !important;
+}
+
+/* remove duplicate repo label inside tabs row */
+body.glass-header .md-tabs .md-source,
+body.glass-header .md-tabs .md-tabs__source,
+body.glass-header .md-tabs .md-header__source {
+  display: none !important;
+}
+/* === Remove the thin white divider line in the top banner === */
+.md-header,
+.md-tabs {
+  border-bottom: none !important;
+}
+
+.md-header::after,
+.md-tabs::after {
+  display: none !important;
+}
+/* === Fix seam line between header + tabs (glass only) === */
+
+/* Remove divider/shadow from the TOP row only */
+body.glass-header .md-header {
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* Keep the visual depth on the tabs row */
+body.glass-header .md-tabs {
+  border-top: none !important;
+}

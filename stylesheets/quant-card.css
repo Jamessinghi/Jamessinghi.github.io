@@ -1,0 +1,769 @@
+/* Quant Snapshot Card (Projects page) */
+.quant-card {
+  max-width: 820px;
+  margin: 2rem auto;
+  padding: 1.4rem 1.4rem 1.1rem;
+  border-radius: 18px;
+
+  /* glass */
+  background: rgba(15, 18, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+.quant-card__kicker {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 0.35rem;
+}
+
+.quant-card__title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.2;
+}
+
+.quant-card__title span {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.70);
+}
+
+.quant-card__table {
+  margin-top: 1.2rem;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.quant-card__table .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0.95rem;
+  background: rgba(0,0,0,0.20);
+}
+
+.quant-card__table .row:nth-child(odd) {
+  background: rgba(0,0,0,0.28);
+}
+
+.quant-card__table .key {
+  color: rgba(255,255,255,0.75);
+  font-weight: 500;
+}
+
+.quant-card__table .val {
+  color: rgba(255,255,255,0.95);
+  font-weight: 700;
+  text-align: right;
+}
+
+.quant-card__table .sub {
+  display: inline-block;
+  margin-left: 0.35rem;
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.60);
+}
+
+.quant-card__footnote {
+  margin-top: 0.9rem;
+  font-size: 0.90rem;
+  color: rgba(255,255,255,0.62);
+}
+
+/* Force styling inside quant card */
+.quant-card .quant-link,
+.quant-card .quant-link:link,
+.quant-card .quant-link:visited {
+  color: rgba(255, 255, 255, 0.85) !important;
+  text-decoration: none !important;
+  border-bottom: 1px solid rgba(255,255,255,0.35);
+  padding-bottom: 1px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.quant-card .quant-link:hover {
+  color: rgba(255, 255, 255, 1) !important;
+  border-bottom-color: rgba(255,255,255,0.8);
+}
+/* =========================
+   System Architecture Section
+   ========================= */
+
+.arch-wrap {
+  max-width: 980px;
+  margin: 2.2rem auto 0;
+  padding: 0 0.5rem;
+}
+
+.arch-title {
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+  color: rgba(20, 24, 28, 0.88);
+}
+
+.arch-subtitle {
+  text-align: center;
+  margin-top: 0.4rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.95rem;
+  color: rgba(20, 24, 28, 0.90);
+}
+
+.arch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.arch-box {
+  background: rgba(255, 255, 255, 0.85);   /* slightly darker glass */
+  backdrop-filter: blur(6px);              /* subtle glass effect */
+  border-radius: 12px;                     /* reduced from 16px */
+  padding: 22px 24px;                      /* tighter padding */
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.08);        /* sharper shadow */
+  border: 1px solid rgba(0, 0, 0, 0.05);   /* subtle fintech edge */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.arch-box__title {
+  font-weight: 750;
+  color: rgba(20, 24, 28, 0.88);
+  margin-bottom: 0.65rem;
+  font-size: 1.02rem;
+}
+
+.arch-list {
+  margin: 0;
+  padding-left: 1.05rem;
+  color: rgba(20, 24, 28, 0.72);
+}
+
+.arch-list li {
+  margin: 0.45rem 0;
+  line-height: 1.25;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 900px) {
+  .arch-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.md-typeset .admonition.note {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.md-typeset .admonition.note > .admonition-title {
+  display: none !important;
+}
+
+.md-typeset .admonition.note > *:not(.admonition-title) {
+  margin: 0 !important;
+}
+
+.arch-box:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.arch-list {
+  margin: 12px 0 0 0;
+  padding-left: 18px;
+}
+
+.arch-list li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.arch-caption {
+  margin: 8px auto 32px auto;     /* center horizontally + spacing below */
+  max-width: 600px;               /* prevents it stretching too wide */
+  text-align: center;             /* center text */
+  font-size: 0.85rem;             /* slightly smaller */
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.90);      /* muted tone */
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+}
+
+.dash-wrap{
+  max-width: 1100px;
+  margin: 3rem auto 0;
+  padding: 0 1rem;
+}
+
+.dash-header{
+  display: grid;
+  grid-template-columns: 1fr auto;   /* left title, right stack */
+  grid-template-rows: auto auto;     /* metrics row, controls row */
+  column-gap: 1rem;
+  row-gap: .8rem;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+.dash-title{
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: rgba(20,24,28,.90);
+}
+
+.dash-subtitle{
+  margin-top: .25rem;
+  color: rgba(20,24,28,.55);
+  font-size: .95rem;
+}
+
+
+.metric{
+  background: rgba(20,24,28,.70);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(255,255,255,.88);
+  border-radius: 12px;
+  padding: .55rem .7rem;
+  min-width: 92px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.18);
+}
+
+.m-k{
+  font-size: .72rem;
+  opacity: .70;
+}
+
+.m-v{
+  font-size: 1rem;
+  font-weight: 800;
+  margin-top: .1rem;
+}
+
+.dash-select{
+  background: rgba(20,24,28,.70);
+  color: rgba(255,255,255,.9);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  padding: .5rem .6rem;
+  outline: none;
+  backdrop-filter: blur(8px);
+}
+
+.dash-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.dash-card{
+  background: rgba(20,24,28,.62);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 1rem 1rem .9rem;
+  box-shadow: 0 18px 42px rgba(0,0,0,.22);
+  backdrop-filter: blur(10px);
+}
+
+.dash-card__title{
+  font-weight: 800;
+  margin-bottom: .6rem;
+  color: rgba(255,255,255,.92);
+}
+
+.dash-note{
+  margin-top: .55rem;
+  font-size: .82rem;
+  color: rgba(255,255,255,.65);
+}
+
+.dash-table{
+  margin-top: 1rem;
+}
+
+.dash-table__wrap{
+  max-height: 320px;   /* <-- scroll area */
+  overflow-y: auto;    /* <-- vertical scroll for your 14 trades */
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+#tradeTable{
+  width:100%;
+  border-collapse:collapse;
+  table-layout: auto;   /* allows tighter fitting */
+}
+
+#tradeTable th,
+#tradeTable td{
+  padding: .45rem .5rem;     /* smaller padding */
+  font-size: .82rem;         /* slightly smaller text */
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  color: #111;
+}
+
+#tradeTable thead th{
+  font-size:.85rem;
+  color: #111;              /* black header text */
+  background: rgba(0,0,0,.05);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+#tradeTable tbody tr:hover{
+  background: linear-gradient(
+    90deg,
+    rgba(46, 204, 113, .12),
+    rgba(46, 204, 113, .04)
+  );
+}
+
+@media (max-width: 950px){
+  .dash-header{ grid-template-columns: 1fr; }
+  .dash-grid{ grid-template-columns: 1fr; }
+  .dash-controls{ justify-content: flex-start; }
+  .dash-metrics{ justify-content: flex-start; }
+}
+
+#tradeTable th:nth-child(1),
+#tradeTable td:nth-child(1) { width: 8%; }   /* # */
+
+#tradeTable th:nth-child(2),
+#tradeTable td:nth-child(2) { width: 8%; }  /* Ticker */
+
+#tradeTable th:nth-child(3),
+#tradeTable td:nth-child(3) { width: 10%; }  /* Entry */
+
+#tradeTable th:nth-child(4),
+#tradeTable td:nth-child(4) { width: 10%; }  /* Exit */
+
+#tradeTable th:nth-child(5),
+#tradeTable td:nth-child(5) { width: 8%; }  /* % Gain */
+
+#tradeTable th:nth-child(6),
+#tradeTable td:nth-child(6) { width: 8%; }   /* Days */
+
+#tradeTable th:nth-child(7),
+#tradeTable td:nth-child(7) { width: 15%; }  /* Strategy */
+
+#tradeTable th:nth-child(1),
+#tradeTable td:nth-child(1),
+#tradeTable th:nth-child(2),
+#tradeTable td:nth-child(2) {
+  padding-left: .35rem;
+  padding-right: .35rem;
+}
+
+#tradeTable th:nth-child(3),
+#tradeTable td:nth-child(3),
+#tradeTable th:nth-child(4),
+#tradeTable td:nth-child(4){
+  white-space: nowrap;
+}
+
+#tradeTable th:nth-child(7),
+#tradeTable td:nth-child(7){
+  white-space: normal;
+}
+
+#tradeTable td:nth-child(1),
+#tradeTable th:nth-child(1) {
+  text-align: center;
+}
+
+/* ==============================
+   DASH HEADER ALIGNMENT (CLEAN)
+   Keep ONE version only
+   ============================== */
+
+/* Header layout: left text | right stack (2 rows) */
+.dash-header{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 1rem;
+  row-gap: .8rem;
+  align-items: start;
+}
+
+/* Row 1: Trades / Win Rate / Avg % Gain (docked right, 3 fixed columns) */
+.dash-metrics--right{
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  gap: 16px 20px;
+  justify-content: end;
+  align-items: end;
+}
+
+/* Row 2: Avg Hold / ticker / strategy (same 3-column grid => perfect alignment) */
+.dash-controls{
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  gap: 16px 20px;
+  justify-content: end;
+  align-items: end;
+}
+
+/* Explicit placement (bulletproof, no nth-child reliance) */
+.dash-controls .metric{ grid-column: 1; }
+.dash-controls #tickerSelect{ grid-column: 2; }
+.dash-controls #strategySelect{ grid-column: 3; }
+
+/* ==============================
+   DASH HEADER (BULLETPROOF GRID)
+   Put at VERY BOTTOM of file
+   ============================== */
+
+/*
+  Layout goal:
+
+  [ left title area ] [ col 2 ]   [ col 3 ]     [ col 4 ]
+  Row 1              Trades      Win Rate      Avg % Gain
+  Row 2              Avg Hold    Ticker        Strategy
+
+  All right-side items share the same columns => perfect alignment.
+*/
+
+.dash-header{
+  display: grid;
+
+  /* left column expands, right columns fit content */
+  grid-template-columns: 1fr max-content max-content max-content;
+
+  /* 2 rows: metrics row + controls row */
+  grid-template-rows: auto auto;
+
+  column-gap: 20px;  /* horizontal spacing between right-side columns */
+  row-gap: 16px;     /* vertical spacing between row 1 and row 2 */
+
+  align-items: start;
+}
+
+/* Left title block sits in column 1 spanning both rows */
+.dash-header__left{
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+/* Common: dock right-side items to the right edge */
+.dash-slot{
+  justify-self: end;
+}
+
+/* Row 1 placements */
+.dash-slot--trades   { grid-column: 2; grid-row: 1; }
+.dash-slot--winrate  { grid-column: 3; grid-row: 1; }
+.dash-slot--avggain  { grid-column: 4; grid-row: 1; }
+
+/* Row 2 placements (Avg Hold directly under Trades) */
+.dash-slot--avghold  { grid-column: 2; grid-row: 2; }
+.dash-slot--ticker   { grid-column: 3; grid-row: 2; }
+.dash-slot--strategy { grid-column: 4; grid-row: 2; }
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 950px){
+  .dash-header{
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    row-gap: 12px;
+  }
+
+  .dash-header__left{
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  /* let everything flow naturally on small screens */
+  .dash-slot{
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    justify-self: start;
+  }
+}
+/* ==============================
+   FORCE UNIFORM DASH BUBBLES
+   ============================== */
+
+.metric{
+  width: 120px;        /* fixed width for ALL metric bubbles */
+  height: 80px;       /* fixed height */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Keep compact metric labels on one line so values remain inside the card. */
+.metric .m-k{
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* Make selects match same visual width */
+.dash-select{
+  width: 120px;
+  height: 80px;
+  box-sizing: border-box;
+}
+/* === Amortisation Calculator === */
+.amort-wrap { margin-top: 1rem; }
+
+.amort-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 1000px) {
+  .amort-grid { grid-template-columns: 1fr; }
+}
+
+.amort-card {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 14px;
+  backdrop-filter: blur(6px);
+}
+
+.amort-card h3 { margin-top: 0; }
+
+.amort-card label {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.amort-card input,
+.amort-card select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.35);
+  color: inherit;
+  outline: none;
+}
+
+.amort-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.amort-summary {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  opacity: 0.95;
+}
+
+.amort-table-wrap {
+  max-height: 520px;         /* scroll like Excel */
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.amort-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.amort-table thead th {
+  position: sticky;           /* sticky header */
+  top: 0;
+  background: #ffffff;
+  z-index: 2;
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.amort-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  white-space: nowrap;
+}
+.full-width-row{
+  grid-column: 1 / -1;   /* if your layout is grid */
+  width: 100%;
+}
+.amort-card input,
+.amort-card select {
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 10px 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.amort-table th {
+  font-weight: 700;
+}
+.amort-card label {
+  font-weight: 700;
+}
+.amort-table th,
+.amort-table td {
+  border: 1px solid rgba(255,255,255,0.7);
+}
+.amort-fn-wrapper {
+  display: none;
+}
+<style>
+  /* --- Match your "Interactive Data Visualisation" dark-glass vibe --- */
+  .stockviz-wrap {
+    margin: 28px auto;
+    max-width: 1150px;
+    padding: 0 18px;
+    font-family: inherit; /* inherits your existing font */
+  }
+  .stockviz-card {
+    border-radius: 22px;
+    background: rgba(50, 50, 50, 0.72);
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: rgba(255,255,255,0.92);
+    padding: 22px 22px 18px;
+  }
+  .stockviz-header h2 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .stockviz-sub {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.35;
+  }
+  .stockviz-sub code {
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.88);
+  }
+
+  .stockviz-controls {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+    margin-top: 10px;
+  }
+  @media (max-width: 850px) {
+    .stockviz-controls {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+  }
+
+  .stockviz-field label {
+    display: block;
+    font-size: 12px;
+    margin: 0 0 6px;
+    color: rgba(255,255,255,0.75);
+  }
+  .stockviz-field input,
+  .stockviz-field select {
+    width: 100%;
+    padding: 12px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.09);
+    color: rgba(255,255,255,0.92);
+    outline: none;
+  }
+  .stockviz-field input::placeholder {
+    color: rgba(255,255,255,0.5);
+  }
+  .stockviz-btn {
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.95);
+    cursor: pointer;
+    font-weight: 650;
+  }
+  .stockviz-btn:hover { background: rgba(255,255,255,0.16); }
+  .stockviz-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .stockviz-error {
+    grid-column: 1 / -1;
+    margin-top: 2px;
+    font-size: 13px;
+    color: rgba(255, 190, 190, 0.95);
+    min-height: 18px;
+  }
+
+  .stockviz-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  @media (max-width: 1100px) { .stockviz-stats { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .stockviz-stats { grid-template-columns: 1fr; } }
+
+  .stat {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.08);
+    padding: 12px 12px;
+  }
+  .stat-k {
+    font-size: 12px;
+    color: rgba(255,255,255,0.70);
+    margin-bottom: 6px;
+  }
+  .stat-v {
+    font-size: 18px;
+    font-weight: 750;
+    letter-spacing: 0.2px;
+  }
+
+  .stockviz-chart {
+    margin-top: 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.10);
+    padding: 14px 14px 10px;
+  }
+  .stockviz-footnote {
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+  }
+</style>
