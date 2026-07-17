@@ -19,7 +19,7 @@
     const slug = lastSegment().toLowerCase();
 
     const GREEN_GLASS = new Set(["", "index", "contact"]); // Home + Contact
-    const BLACK_PNG   = new Set(["projects", "resume"]);   // Projects + Resume
+    const BLACK_PNG   = new Set(["projects", "engineering", "resume"]); // Project pages + Resume
 
     if (GREEN_GLASS.has(slug)) {
       // Home + Contact: GLASS only (no PNG strip)

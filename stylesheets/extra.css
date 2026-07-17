@@ -404,3 +404,75 @@ body.glass-header .md-header {
 body.glass-header .md-tabs {
   border-top: none !important;
 }
+
+/* === Projects category dropdown === */
+/* Material clips tab descendants with `overflow: auto` and `contain: content`.
+   Let the category menu extend below the navigation strip at every width. */
+.md-tabs,
+.md-tabs__inner,
+.md-tabs__list {
+  overflow: visible !important;
+}
+
+.md-tabs__list {
+  contain: none !important;
+}
+
+.md-tabs__item--projects {
+  position: relative;
+}
+
+.project-menu {
+  position: absolute;
+  top: calc(100% - 0.15rem);
+  left: 50%;
+  z-index: 40;
+  min-width: 150px;
+  padding: 7px;
+  visibility: hidden;
+  opacity: 0;
+  background: rgba(10, 20, 14, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 11px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+  pointer-events: none;
+  transform: translate(-50%, -5px);
+  transition: opacity 140ms ease, transform 140ms ease, visibility 140ms ease;
+}
+
+.md-tabs__item--projects:hover .project-menu,
+.md-tabs__item--projects:focus-within .project-menu {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.project-menu__link {
+  display: block;
+  padding: 8px 10px;
+  color: rgba(238, 246, 239, 0.82) !important;
+  border-radius: 7px;
+  font-size: 13px;
+  line-height: 1.2;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+
+.project-menu__link:hover,
+.project-menu__link:focus-visible {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.09);
+  outline: none;
+}
+
+.project-menu__link--active {
+  color: #8fe3b0 !important;
+  background: rgba(143, 227, 176, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-menu {
+    transition: none;
+  }
+}

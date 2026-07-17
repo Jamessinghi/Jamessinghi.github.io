@@ -55,7 +55,7 @@
     }
 
     const slug = lastSegment().toLowerCase();
-    const useBubbles = slug === 'projects' || slug === 'resume';
+    const useBubbles = slug === 'projects' || slug === 'engineering' || slug === 'resume';
 
     if (useBubbles) {
       window.__tickerBackground?.destroy();

@@ -641,10 +641,9 @@
 .amort-fn-wrapper {
   display: none;
 }
-<style>
-  /* --- Match your "Interactive Data Visualisation" dark-glass vibe --- */
+/* --- Match your "Interactive Data Visualisation" dark-glass vibe --- */
   .stockviz-wrap {
-    margin: 28px auto;
+    margin: 28px auto 0;
     width: 100%;
     max-width: none;
     padding: 0;
@@ -771,4 +770,190 @@
     font-size: 12px;
     color: rgba(255,255,255,0.65);
   }
-</style>
+/* === Drone photography business project === */
+.venture-wrap {
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 52px;
+}
+
+.venture-card {
+  padding: 24px;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(50, 50, 50, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.venture-header {
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.venture-kicker {
+  margin-bottom: 0.35rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.venture-header h2 {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.venture-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.venture-block {
+  min-width: 0;
+  overflow: hidden;
+  background: rgba(15, 18, 22, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 17px;
+}
+
+.venture-preview {
+  display: block;
+  min-height: 0;
+}
+
+.venture-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 180ms ease;
+}
+
+.venture-preview:hover img {
+  transform: scale(1.015);
+}
+
+.venture-copy {
+  padding: 22px;
+}
+
+.venture-copy h3 {
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 20px;
+  text-align: left;
+}
+
+.venture-copy p {
+  margin: 0 0 13px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.venture-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.venture-link-block {
+  grid-column: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+}
+
+.venture-link-label {
+  display: block;
+  margin-bottom: 3px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+}
+
+.venture-link-block strong {
+  color: #fff;
+  font-size: 18px;
+}
+
+.venture-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 11px 15px;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.venture-link:hover {
+  background: rgba(255, 255, 255, 0.17);
+  text-decoration: none !important;
+}
+
+@media (max-width: 760px) {
+  .venture-card {
+    padding: 16px;
+  }
+
+  .venture-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .venture-link-block {
+    grid-column: auto;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .venture-preview img {
+    min-height: 220px;
+    aspect-ratio: 16 / 10;
+  }
+}
+
+/* === Engineering projects placeholder === */
+.engineering-empty {
+  width: 100%;
+  margin: 2rem auto 0;
+  padding: clamp(38px, 7vw, 72px) 24px;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(50, 50, 50, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.engineering-empty__kicker {
+  margin-bottom: 0.45rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+}
+
+.engineering-empty h2 {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.3;
+}

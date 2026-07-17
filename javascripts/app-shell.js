@@ -4,7 +4,7 @@
   let navigationController = null;
 
   function isShellLink(link) {
-    if (!link?.matches('.md-tabs__link')) return false;
+    if (!link?.matches('.md-tabs__link, .project-menu__link')) return false;
     const url = new URL(link.href, location.href);
     return url.origin === location.origin;
   }
@@ -68,7 +68,7 @@
   }
 
   document.addEventListener('click', event => {
-    const link = event.target.closest?.('.md-tabs__link');
+    const link = event.target.closest?.('.md-tabs__link, .project-menu__link');
     if (!isShellLink(link)) return;
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
@@ -77,14 +77,14 @@
   });
 
   document.addEventListener('pointerenter', event => {
-    const link = event.target.closest?.('.md-tabs__link');
+    const link = event.target.closest?.('.md-tabs__link, .project-menu__link');
     if (link) prefetch(link);
   }, true);
 
   window.addEventListener('popstate', () => navigate(location.href, { popstate: true }));
 
   const prefetchTabs = () => {
-    document.querySelectorAll('.md-tabs__link').forEach(prefetch);
+    document.querySelectorAll('.md-tabs__link, .project-menu__link').forEach(prefetch);
   };
   if ('requestIdleCallback' in window) requestIdleCallback(prefetchTabs, { timeout: 1500 });
   else setTimeout(prefetchTabs, 250);

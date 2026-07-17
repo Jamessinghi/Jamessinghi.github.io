@@ -30,20 +30,22 @@ No application server, database, package installation, or compilation step is re
 | Route | Purpose |
 | --- | --- |
 | `/` | Portfolio introduction and professional summary |
-| `/projects/` | Software, finance, trading, visualization, and calculator projects |
+| `/projects/` | Business, finance, trading, visualization, and calculator projects |
+| `/engineering/` | Engineering projects and upcoming work |
 | `/resume/` | Resume and professional experience |
 | `/contact/` | Contact information and professional links |
 
 ## Features
 
-- Responsive portfolio navigation and search
+- Responsive portfolio navigation and search, including Engineering and Business project categories
 - Persistent client-side app shell with prefetched, reload-free tab navigation
 - Sticky two-row header that remains visible while scrolling
 - Animated stock-ticker background on the Home and Contact pages
-- Animated bubble background on the Projects and Resume pages
+- Animated bubble background on the Business Projects, Engineering Projects, and Resume pages
 - Trading-performance metrics, charts, filters, and trade table
 - Amortisation calculator
 - Stock visualization controls
+- JS Drones small-business profile with a website preview and direct link
 - Downloadable resume and trading-log documents
 - GitHub and LinkedIn links
 - Reduced-motion support for animated backgrounds
@@ -57,7 +59,9 @@ The site uses four primary layers:
 3. **Custom presentation** — `stylesheets/extra.css` and `stylesheets/quant-card.css`.
 4. **Interactive behavior** — scripts in `javascripts/` and JSON data in `assets/`.
 
-`javascripts/app-shell.js` keeps the shared header and JavaScript runtime mounted while navigating between tabs. It prefetches the four page documents, replaces only the Material page container, updates browser history and the document title, and emits an `app-shell:navigate` event so page-specific components can initialize without a full reload. Direct links and browser back/forward navigation continue to work normally.
+`javascripts/app-shell.js` keeps the shared header and JavaScript runtime mounted while navigating between tabs. It prefetches the primary page documents and the Engineering and Business project-category destinations, replaces only the Material page container, updates browser history and the document title, and emits an `app-shell:navigate` event so page-specific components can initialize without a full reload. Direct links and browser back/forward navigation continue to work normally.
+
+Hovering or focusing the Projects navigation tab reveals links to the Engineering and Business project pages. The dropdown remains inside the shared app shell, so selecting either category uses the same reload-free navigation path as the primary tabs.
 
 The page-aware background loader chooses an animation based on the current route:
 
@@ -65,7 +69,8 @@ The page-aware background loader chooses an animation based on the current route
 | --- | --- |
 | Home | Stock ticker canvas |
 | Contact | Stock ticker canvas |
-| Projects | SVG bubbles |
+| Business Projects | SVG bubbles |
+| Engineering Projects | SVG bubbles |
 | Resume | SVG bubbles |
 
 ## Repository structure
@@ -75,7 +80,8 @@ The page-aware background loader chooses an animation based on the current route
 ├── index.html                     # Home page
 ├── 404.html                       # GitHub Pages fallback
 ├── contact/index.html             # Contact page
-├── projects/index.html            # Projects and dashboards
+├── projects/index.html            # Business projects and dashboards
+├── engineering/index.html         # Engineering projects
 ├── resume/index.html              # Resume page
 ├── assets/
 │   ├── images/                    # Favicon and image assets
