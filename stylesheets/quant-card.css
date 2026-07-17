@@ -1,6 +1,7 @@
 /* Quant Snapshot Card (Projects page) */
 .quant-card {
-  max-width: 820px;
+  width: 100%;
+  max-width: none;
   margin: 2rem auto;
   padding: 1.4rem 1.4rem 1.1rem;
   border-radius: 18px;
@@ -99,7 +100,8 @@
    ========================= */
 
 .arch-wrap {
-  max-width: 980px;
+  width: 100%;
+  max-width: none;
   margin: 2.2rem auto 0;
   padding: 0 0.5rem;
 }
@@ -205,9 +207,10 @@
 }
 
 .dash-wrap{
-  max-width: 1100px;
+  width: 100%;
+  max-width: none;
   margin: 3rem auto 0;
-  padding: 0 1rem;
+  padding: 0;
 }
 
 .dash-header{
@@ -641,8 +644,9 @@
   /* --- Match your "Interactive Data Visualisation" dark-glass vibe --- */
   .stockviz-wrap {
     margin: 28px auto;
-    max-width: 1150px;
-    padding: 0 18px;
+    width: 100%;
+    max-width: none;
+    padding: 0;
     font-family: inherit; /* inherits your existing font */
   }
   .stockviz-card {
