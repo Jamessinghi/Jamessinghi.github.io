@@ -346,8 +346,20 @@ body.header-skin--black { --header-skin-image: url("../assets/header-bar-black.p
    GLASS (Home + Contact only)
    ========================= */
 
-body.glass-header::before { content: none !important; display: none !important; }
-body.glass-header.header-skin--image::before { content: none !important; display: none !important; }
+/* One continuous opaque strip behind both header rows closes their seam. */
+body.glass-header::before,
+body.glass-header.header-skin--image::before {
+  content: "" !important;
+  display: block !important;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: calc(var(--md-header-height, 2.5rem) + var(--md-tabs-height, 2.5rem));
+  background: rgb(8, 22, 12) !important;
+  z-index: 9;
+  pointer-events: none;
+}
 
 /* The actual glass effect */
 body.glass-header .md-header,
