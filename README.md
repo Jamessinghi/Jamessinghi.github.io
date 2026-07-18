@@ -46,6 +46,8 @@ No application server, database, package installation, or compilation step is re
 - Amortisation calculator
 - Stock visualization controls
 - JS Drones small-business profile with a website preview and direct link
+- Securities Valuation Engine profile with an embedded live preview, deployed
+  application link, and source-code link
 - Downloadable resume and trading-log documents
 - GitHub and LinkedIn links
 - Reduced-motion support for animated backgrounds
@@ -62,6 +64,13 @@ The site uses four primary layers:
 `javascripts/app-shell.js` keeps the shared header and JavaScript runtime mounted while navigating between tabs. It prefetches the primary page documents and the Engineering and Business project-category destinations, replaces only the Material page container, updates browser history and the document title, and emits an `app-shell:navigate` event so page-specific components can initialize without a full reload. Direct links and browser back/forward navigation continue to work normally.
 
 Hovering or focusing the Projects navigation tab reveals links to the Engineering and Business project pages. The dropdown remains inside the shared app shell, so selecting either category uses the same reload-free navigation path as the primary tabs.
+
+The Business Projects page presents external ventures as responsive `venture`
+cards. JS Drones uses a static website image, while the Securities Valuation
+Engine uses a lazy-loaded live iframe and provides explicit links to both the
+deployed application and its GitHub repository. The iframe is supplementary;
+all project information and destinations remain accessible if embedding is
+unavailable.
 
 The page-aware background loader chooses an animation based on the current route:
 
