@@ -1,12 +1,9 @@
 /* ============================================================================
-   3D Perspective Cyber Ticker Background — "Quotes fly out to the right"
-   - Real quotes from assets/quotes.json (refreshed hourly from Twelve Data by
-     .github/workflows/quotes.yml). The browser only ever reads the static JSON;
-     the API key lives in a GitHub Secret and never reaches the client.
-   - Quote sprites travel LEFT -> RIGHT along fixed lanes. A horizontal
-     perspective makes them small/faint on the left and grow + glow as they move
-     right, popping out of the page at the right edge before recycling.
-   - Content (H1 + first paragraph) stays readable via a soft cover panel.
+   Horizontal Cyber Ticker Background — Fade-Under-Content (Tight Cover)
+   - Same crisp left→right ticker (binary + stock tape)
+   - Smooth fade under only the H1 + first paragraph
+   - Cover box hugs text with ~2ch padding (≈ 2 characters)
+   - No transparency punching (so no white card ever shows through)
    ========================================================================== */
 
 (function () {
@@ -62,7 +59,10 @@
 
   // === CONFIGURATION =========================================================
   const USE_DARK_CONTENT = true;       // makes page text white on dark
+  const MIN_SPEED = 28;                // px/sec
+  const MAX_SPEED = 70;
   const BASE_FONT_PX = 16;
+  const LINE_HEIGHT  = 1.6;
   const FONT_FAMILY  = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 
   // Colors
@@ -73,32 +73,21 @@
   const COLOR_SEP    = '#cde0cd';      // separator dots
 
   // Background wash (gloomy green gradient)
-  const WASH_TOP     = '#04120a';
-  const WASH_MID     = '#071c10';
-  const WASH_BOTTOM  = '#020a05';
+  const WASH_TOP     = '#071a0f';
+  const WASH_MID     = '#0a1f12';
+  const WASH_BOTTOM  = '#07190c';
+
+  // Disable glows
+  const SHADOW_COLOR = 'transparent';
+  const SHADOW_BLUR  = 0;
 
   // Stocks to simulate
   const TICKERS = ['AAPL','MSFT','NVDA','GOOGL','AMZN','TSLA','META','AMD'];
 
-  // === 3D HORIZONTAL PERSPECTIVE CONFIG ======================================
-  // Each sprite has u = 1/depth. u grows over time so the sprite moves right and
-  // scales up: u ~ U_FAR at the far-left, u ~ 1 at the right edge, a little past
-  // 1 as it flies off-screen (popping out) and recycles to the left.
-  const U_FAR        = 0.06;   // smallest u (deepest sprite, far left + tiny)
-  const U_MAX        = 1.14;   // recycle once a sprite passes this (off right edge)
-  const NEAR_SCALE   = 2.7;    // font multiplier for the closest sprites
-  const FLOW_SPEED   = 0.13;   // u-units per second (left -> right speed)
-  const VANISH_XFRAC = 0.03;   // where sprites emerge from (fraction of width)
-  const SPREAD_XFRAC = 1.05;   // horizontal travel span (fraction of width)
-  const GLOW_YFRAC   = 0.44;   // vertical centre of the light bloom
-  const DENSITY_PX   = 34000;  // one sprite per this many device px² (approx)
-  const MIN_SPRITES  = 26;
-  const MAX_SPRITES  = 70;
-
   // Fade-under-content configuration
   const ENABLE_FADE_COVER = true;      // draw a cover over content instead of cutting a hole
   const RADIUS_PX   = 28;              // softer rounded corners for the content cover
-  const COVER_ALPHA = 0.55;            // translucent so the light bloom bleeds through
+  const FEATHER_OPACITY = 1;           // fully isolate content from moving ticker pixels
 
   // === CANVAS SETUP ==========================================================
   const canvas = document.createElement('canvas');
@@ -119,10 +108,9 @@
   // === STATE ================================================================
   let DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
   let W = 0, H = 0;
-  let fontPx = 0;
-  let vanishX = 0, spreadX = 0, glowY = 0;
+  let fontPx = 0, lineGap = 0;
   let backgroundGradient = null;
-  let sprites = [];
+  let rows = [];
   let running = true;
   let stock = TICKERS.map(sym => ({ sym, price: seedPrice(sym), prev: null }));
   let quotesMeta = { updated_at_utc: null };
@@ -135,41 +123,90 @@
     const base = { AAPL:190, MSFT:420, NVDA:820, GOOGL:155, AMZN:175, TSLA:210, META:500, AMD:155 };
     return (base[sym] || 100) + Math.random() * 2 - 1;
   }
-
-  // ---------- Sprite content (one quote group, or a binary chunk) ------------
-  function stockSegments(s) {
-    const pc = (typeof s.prev_close === "number" && s.prev_close > 0) ? s.prev_close : s.price;
-    const delta = ((s.price - pc) / pc) * 100;
-    const up = delta >= 0;
-    const arrow = up ? '▲' : '▼';
-    return [
-      { text: `${s.sym} `, color: COLOR_LABEL },
-      { text: `${s.price.toFixed(2)} `, color: up ? COLOR_UP : COLOR_DOWN },
-      { text: `${arrow}${Math.abs(delta).toFixed(2)}%`, color: up ? COLOR_UP : COLOR_DOWN }
-    ];
+  function stepPrice(p) {
+    const step = (Math.random() - 0.5) * (Math.random() < 0.9 ? 0.8 : 3.2);
+    return Math.max(1, p + step);
   }
 
-  function codeSegments() {
+  function buildStockSegments() {
+    const segs = [];
+
+    stock.forEach(s => {
+      const pc = (typeof s.prev_close === "number" && s.prev_close > 0) ? s.prev_close : s.price;
+      const delta = ((s.price - pc) / pc) * 100;
+      const up = delta >= 0;
+      const arrow = up ? '▲' : '▼';
+
+      segs.push({ text: `${s.sym} `, color: COLOR_LABEL });
+      segs.push({ text: `${s.price.toFixed(2)} `, color: up ? COLOR_UP : COLOR_DOWN });
+      segs.push({
+        text: `${arrow}${Math.abs(delta).toFixed(2)}%`,
+        color: up ? COLOR_UP : COLOR_DOWN
+      });
+      segs.push({ text: '   •   ', color: COLOR_SEP });
+    });
+
+    return segs.concat(segs);
+  }
+
+  function buildCodeString(targetWidthPx) {
     let s = '';
-    const groups = 4 + Math.floor(Math.random() * 4);
-    for (let i = 0; i < groups; i++) s += (Math.random() < 0.5 ? '0101 ' : '1001 ');
-    return [{ text: s.trim(), color: COLOR_CODE }];
+    while (ctx.measureText(s).width < targetWidthPx) {
+      s += Math.random() < 0.5 ? '0101 ' : '1001 ';
+    }
+    return s + '     ';
   }
 
-  function buildSegments(sprite) {
-    if (sprite.kind === 'code') return codeSegments();
-    return stockSegments(stock[sprite.si]);
+  function makeRow(y, index) {
+    const type  = (index % 2 === 0) ? 'code' : 'stock';
+    const speed = lerp(MIN_SPEED, MAX_SPEED, Math.random());
+    const x     = -Math.random() * (W * 0.75);
+    if (type === 'code') {
+      const text = buildCodeString(W * 1.5);
+      const row = { y, x, speed, type, text, width: ctx.measureText(text).width };
+      cacheRow(row);
+      return row;
+    } else {
+      const parts = buildStockSegments();
+      const width = parts.reduce((a, s) => a + ctx.measureText(s.text).width, 0);
+      const row = { y, x, speed, type, parts, width };
+      cacheRow(row);
+      return row;
+    }
   }
 
-  // ---------- Create / recycle a sprite --------------------------------------
-  function spawnSprite(sprite, u) {
-    sprite.kind = Math.random() < 0.7 ? 'stock' : 'code';
-    sprite.si = Math.floor(Math.random() * stock.length);
-    sprite.u = u;
-    sprite.y = Math.round(H * (0.06 + Math.random() * 0.9));
-    sprite.speedJitter = 0.8 + Math.random() * 0.5;
-    sprite.segments = buildSegments(sprite);
-    return sprite;
+  // Render each complete row once. The animation loop can then composite one
+  // bitmap per row instead of measuring and painting every segment every frame.
+  function cacheRow(row) {
+    const padding = Math.max(2, Math.ceil(2 * DPR));
+    const bitmap = typeof OffscreenCanvas === 'function'
+      ? new OffscreenCanvas(Math.ceil(row.width + padding * 2), Math.ceil(lineGap * 1.25))
+      : document.createElement('canvas');
+
+    bitmap.width = Math.ceil(row.width + padding * 2);
+    bitmap.height = Math.ceil(lineGap * 1.25);
+
+    const bitmapCtx = bitmap.getContext('2d', { alpha: true });
+    bitmapCtx.font = ctx.font;
+    bitmapCtx.textBaseline = 'alphabetic';
+    bitmapCtx.imageSmoothingEnabled = false;
+
+    const baseline = fontPx;
+    if (row.type === 'code') {
+      bitmapCtx.fillStyle = COLOR_CODE;
+      bitmapCtx.fillText(row.text, padding, baseline);
+    } else {
+      let dx = padding;
+      row.parts.forEach(segment => {
+        bitmapCtx.fillStyle = segment.color;
+        bitmapCtx.fillText(segment.text, dx, baseline);
+        dx += bitmapCtx.measureText(segment.text).width;
+      });
+    }
+
+    row.bitmap = bitmap;
+    row.bitmapPadding = padding;
+    row.bitmapBaseline = baseline;
   }
 
   // ---------- Utility: build rounded rectangle path (device pixels) ----------
@@ -188,7 +225,7 @@
     ctx2.closePath();
   }
 
-  // ---------- Measure ~2ch (two "character" units) for an element -----------
+  // ---------- Measure ~2ch (two “character” units) for an element -----------
   function twoChPx(el) {
     const span = document.createElement('span');
     span.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;';
@@ -253,17 +290,17 @@
     };
   }
 
-  // ---------- Paint a soft translucent cover over the content area -----------
+  // ---------- Paint a soft cover over the content area -----------------------
   function coverContentArea() {
     if (!cover || !ENABLE_FADE_COVER) return;
 
     ctx.save();
-    ctx.globalAlpha = COVER_ALPHA;
+    ctx.globalAlpha = FEATHER_OPACITY;
 
     const g = ctx.createLinearGradient(0, cover.y, 0, cover.y + cover.h);
-    g.addColorStop(0,   'rgba(4, 16, 10, 0.9)');
-    g.addColorStop(0.5, 'rgba(6, 22, 13, 1)');
-    g.addColorStop(1,   'rgba(3, 12, 7, 0.9)');
+    g.addColorStop(0,   WASH_TOP);
+    g.addColorStop(0.5, WASH_MID);
+    g.addColorStop(1,   WASH_BOTTOM);
     ctx.fillStyle = g;
 
     roundedRectPath(ctx, cover.x, cover.y, cover.w, cover.h, cover.r);
@@ -271,69 +308,7 @@
     ctx.restore();
   }
 
-  // ---------- Glowing light bloom (the bright "pop-out" light) ---------------
-  function drawGlow() {
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-
-    // Broad soft band across the middle so the whole field feels lit.
-    const bandH = H * 0.16;
-    const vg = ctx.createLinearGradient(0, glowY - bandH, 0, glowY + bandH);
-    vg.addColorStop(0.0, 'rgba(0,0,0,0)');
-    vg.addColorStop(0.5, 'rgba(84, 232, 170, 0.18)');
-    vg.addColorStop(1.0, 'rgba(0,0,0,0)');
-    ctx.fillStyle = vg;
-    ctx.fillRect(0, glowY - bandH, W, bandH * 2);
-
-    // Bright bloom toward the right, where sprites pop out of the page.
-    const cxGlow = W * 0.66;
-    const rg = ctx.createRadialGradient(cxGlow, glowY, 0, cxGlow, glowY, W * 0.5);
-    rg.addColorStop(0.0, 'rgba(210, 255, 232, 0.5)');
-    rg.addColorStop(0.28, 'rgba(120, 240, 185, 0.24)');
-    rg.addColorStop(1.0, 'rgba(0,0,0,0)');
-    ctx.fillStyle = rg;
-    ctx.fillRect(0, glowY - bandH * 1.6, W, bandH * 3.2);
-
-    ctx.restore();
-  }
-
-  // ---------- Project + draw a single sprite ---------------------------------
-  function drawSprite(sprite) {
-    const u = sprite.u;
-    const fontSize = Math.max(1, fontPx * NEAR_SCALE * u);
-    if (fontSize < 1.2) return;
-
-    const x = vanishX + spreadX * u;   // moves rightward as u grows
-    const y = sprite.y;                // fixed lane -> motion stays horizontal
-    if (x > W + fontSize * 10) return;
-
-    // Fade in on the left; fade out as it pops off the right edge.
-    let alpha = smoothstep(U_FAR, U_FAR + 0.12, u);
-    if (u > 1.0) alpha *= Math.max(0, 1 - (u - 1.0) / (U_MAX - 1.0));
-    if (alpha <= 0.01) return;
-
-    ctx.font = `${fontSize}px ${FONT_FAMILY}`;
-    ctx.textBaseline = 'middle';
-
-    let totalW = 0;
-    for (const seg of sprite.segments) totalW += ctx.measureText(seg.text).width;
-    let cx = x - totalW / 2;   // centre the sprite on its x so it grows in place
-
-    const glow = u > 0.4 ? (u - 0.4) * 30 * DPR : 0;
-
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    if (glow > 0) ctx.shadowBlur = glow;
-    for (const seg of sprite.segments) {
-      if (glow > 0) ctx.shadowColor = seg.color;
-      ctx.fillStyle = seg.color;
-      ctx.fillText(seg.text, cx, y);
-      cx += ctx.measureText(seg.text).width;
-    }
-    ctx.restore();
-  }
-
-  // ---------- Fit canvas to viewport + rebuild sprites -----------------------
+  // ---------- Fit canvas to viewport + rebuild rows --------------------------
   function fit() {
     DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
     const cssW = window.innerWidth, cssH = window.innerHeight;
@@ -345,27 +320,26 @@
     W = canvas.width; H = canvas.height;
 
     fontPx = Math.floor(BASE_FONT_PX * DPR);
-    vanishX = Math.round(W * VANISH_XFRAC);
-    spreadX = Math.round(W * SPREAD_XFRAC);
-    glowY = Math.round(H * GLOW_YFRAC);
-
     ctx.font = `${fontPx}px ${FONT_FAMILY}`;
-    ctx.textBaseline = 'middle';
-    ctx.imageSmoothingEnabled = true;
+    ctx.textBaseline = 'alphabetic';
+    ctx.shadowColor = SHADOW_COLOR;
+    ctx.shadowBlur  = SHADOW_BLUR;
+    ctx.imageSmoothingEnabled = false;
 
     backgroundGradient = ctx.createLinearGradient(0, 0, 0, H);
     backgroundGradient.addColorStop(0, WASH_TOP);
-    backgroundGradient.addColorStop(0.42, WASH_MID);
+    backgroundGradient.addColorStop(0.5, WASH_MID);
     backgroundGradient.addColorStop(1, WASH_BOTTOM);
 
-    const count = Math.max(MIN_SPRITES,
-      Math.min(MAX_SPRITES, Math.round((W * H) / DENSITY_PX)));
-
-    sprites = [];
+    lineGap = Math.floor(fontPx * LINE_HEIGHT);
+    rows = [];
+    const topPad = Math.floor(lineGap * 1.4);
+    const bottomPad = Math.floor(lineGap * 1.4);
+    const usable = Math.max(0, H - topPad - bottomPad);
+    const count = Math.max(1, Math.floor(usable / lineGap));
     for (let i = 0; i < count; i++) {
-      // Spread sprites through depth so they fill the whole left->right span.
-      const u = U_FAR + (U_MAX - U_FAR) * (i / count);
-      sprites.push(spawnSprite({}, u));
+      const y = Math.round(topPad + i * lineGap);
+      rows.push(makeRow(y, i));
     }
 
     computeCoverArea();
@@ -384,34 +358,39 @@
     const dt = Math.min((now - last) / 1000, 0.1);
     last = now;
 
-    // Background wash
     ctx.fillStyle = backgroundGradient;
     ctx.fillRect(0, 0, W, H);
 
-    // Light bloom behind the field
-    drawGlow();
+    rows.forEach(row => {
+      row.x += row.speed * DPR * dt;
+      const sx = row.x;
 
-    // Advance sprites left -> right and recycle the ones that pop out.
-    sprites.forEach(s => {
-      s.u += FLOW_SPEED * s.speedJitter * dt;
-      if (s.u > U_MAX) spawnSprite(s, U_FAR);
+      if (row.type === 'code') {
+        ctx.drawImage(row.bitmap, sx - row.bitmapPadding, row.y - row.bitmapBaseline);
+        if (row.x > W + 50 * DPR) {
+          row.text  = buildCodeString(W * 1.5);
+          row.width = ctx.measureText(row.text).width;
+          row.x     = -row.width - 50 * DPR;
+          cacheRow(row);
+        }
+      } else {
+        ctx.drawImage(row.bitmap, sx - row.bitmapPadding, row.y - row.bitmapBaseline);
+        if (row.x > W + 50 * DPR) {
+          row.parts = buildStockSegments();
+          row.width = row.parts.reduce((a, s) => a + ctx.measureText(s.text).width, 0);
+          row.x = -row.width - 50 * DPR;
+          cacheRow(row);
+        }
+      }
     });
 
-    // Painter's algorithm: draw far (small u) first so near sprites sit on top.
-    const ordered = sprites.slice().sort((a, b) => a.u - b.u);
-    for (const s of ordered) drawSprite(s);
-
-    // Keep the headline + intro readable
     coverContentArea();
 
     requestAnimationFrame(tick);
   }
 
   // Helpers
-  function smoothstep(edge0, edge1, x) {
-    const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
-    return t * t * (3 - 2 * t);
-  }
+  function lerp(a, b, t) { return a + (b - a) * t; }
 
   function handleVisibilityChange() { last = performance.now(); }
   function handleResize() { fit(); computeCoverArea(); }
@@ -432,7 +411,7 @@
     }
   };
 
-  // Boot (fit first so sprites exist, then load quotes, then refresh stock data)
+  // Boot (fit first so rows exist, then load quotes, then refresh stock rows)
   (async () => {
     fit();
 
@@ -453,8 +432,10 @@
         let prevClose = NaN;
 
         if (typeof q === 'number') {
+          // New format: number is the price
           price = Number(q);
         } else {
+          // Old format: object with price/prev_close
           price = Number(q?.price);
           prevClose = Number(q?.prev_close);
         }
@@ -466,8 +447,14 @@
         return { sym, price: p, prev_close: pc };
       });
 
-      // Rebuild stock sprites so they show the real prices immediately.
-      sprites.forEach(s => { if (s.kind === 'stock') s.segments = buildSegments(s); });
+      // Force immediate refresh of already-created stock rows
+      rows.forEach(r => {
+        if (r.type === 'stock') {
+          r.parts = buildStockSegments();
+          r.width = r.parts.reduce((a, s) => a + ctx.measureText(s.text).width, 0);
+          cacheRow(r);
+        }
+      });
     }
 
     last = performance.now();
