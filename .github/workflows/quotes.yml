@@ -1,0 +1,64 @@
+name: Refresh quotes (Twelve Data)
+
+# Runs on a schedule so Twelve Data is called at most once per hour, no matter
+# how much traffic the site receives. Visitors only ever read the static
+# assets/quotes.json this job produces, so the API key never reaches a browser.
+on:
+  schedule:
+    - cron: "0 * * * *"   # top of every hour (UTC)
+  workflow_dispatch:        # allow a manual refresh from the Actions tab
+
+permissions:
+  contents: write   # commit refreshed quotes.json
+  pages: write      # redeploy the site with the new data
+  id-token: write   # required by deploy-pages
+
+# Share the "pages" concurrency group with the deploy workflow so the two
+# never try to publish at the same time.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch latest quotes
+        env:
+          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
+        run: python scripts/fetch_quotes.py
+
+      - name: Commit refreshed quotes (only if changed)
+        run: |
+          if git diff --quiet -- assets/quotes.json; then
+            echo "No quote changes; skipping commit."
+          else
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add assets/quotes.json
+            git commit -m "chore(quotes): refresh from Twelve Data [skip ci]"
+            git push
+          fi
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
