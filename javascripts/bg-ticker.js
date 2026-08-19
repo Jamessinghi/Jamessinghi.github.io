@@ -1,9 +1,30 @@
 /* ============================================================================
-   Horizontal Cyber Ticker Background — Fade-Under-Content (Tight Cover)
-   - Same crisp left→right ticker (binary + stock tape)
-   - Smooth fade under only the H1 + first paragraph
-   - Cover box hugs text with ~2ch padding (≈ 2 characters)
-   - No transparency punching (so no white card ever shows through)
+   Cyber Ticker Background — scrolling binary + stock tape with hover previews
+   ----------------------------------------------------------------------------
+   Rendering
+   - Left→right tape of alternating rows: binary (0101/1001) and live-style
+     stock quotes (SYM price ▲/▼pct%), drawn on a full-viewport canvas.
+   - The whole #ticker-bg canvas is tilted in 3D via CSS (see stylesheets/
+     extra.css: perspective + rotateY) so the tape appears to lift off the page
+     toward the right. Because that transform skews canvas coordinates, mouse
+     hit-testing inverts it (mouseToCanvas) to map the cursor back into the tape.
+   - A separate, NON-transformed overlay canvas (#ticker-cover) draws the upright
+     content cover (behind the H1 + intro) and the hover loader ring, so those
+     stay flat while the tape is tilted.
+
+   Hover interaction (quotes only — binary rows are ignored)
+   1. Hovering a quote pops it: it is redrawn enlarged + glowing, and the
+      original underneath is erased so there is no doubled/ghosted copy.
+   2. After PAUSE_DELAY ms of continuous hovering, the tape freezes on the quote.
+   3. A loader ring around the cursor then fills over LOAD_SECS seconds
+      (wall-clock based, so it is frame-rate independent).
+   4. On completion a website-preview bubble appears (screenshot via Microlink,
+      falling back to thum.io, then a text card). The bubble latches in place,
+      can be moused onto, and opens the company site in a new tab on click.
+      Ticker→website map lives in SITES; data here is SIMULATED (not live yet).
+
+   Readability: the content cover repaints behind the headline/intro so text
+   stays legible over the moving tape.
    ========================================================================== */
 
 (function () {
@@ -84,6 +105,20 @@
   // Stocks to simulate
   const TICKERS = ['AAPL','MSFT','NVDA','GOOGL','AMZN','TSLA','META','AMD'];
 
+  // Company websites shown in the hover preview bubble.
+  const SITES = {
+    GOOGL: 'https://about.google/',
+    NVDA:  'https://www.nvidia.com/en-au/',
+    AMZN:  'https://www.amazon.com.au/',
+    AAPL:  'https://www.apple.com/au/',
+    AMD:   'https://www.amd.com/en.html',
+    META:  'https://www.meta.com/au/',
+    TSLA:  'https://www.tesla.com/en_au',
+    MSFT:  'https://www.microsoft.com/'   // default (not supplied); change if desired
+  };
+  const LOAD_SECS = 3;      // seconds to fill the loader ring before the preview
+  const PAUSE_DELAY = 350;  // ms hovering a quote before the tape freezes
+
   // Fade-under-content configuration
   const ENABLE_FADE_COVER = true;      // draw a cover over content instead of cutting a hole
   const RADIUS_PX   = 28;              // softer rounded corners for the content cover
@@ -105,6 +140,23 @@
   // Opaque canvas: we paint *over* the ticker to fade, never punch through
   const ctx = canvas.getContext('2d', { alpha: false });
 
+  // Separate, NON-rotated overlay for the content cover. #ticker-bg is rotated
+  // via CSS; the cover must stay upright and hug the text, so it lives on its
+  // own transparent canvas that sits above the rotated ticker but below the
+  // page content (z-index 0, later in the DOM than #ticker-bg).
+  const coverCanvas = document.createElement('canvas');
+  coverCanvas.id = 'ticker-cover';
+  Object.assign(coverCanvas.style, {
+    position: 'fixed',
+    inset: '0',
+    width: '100vw',
+    height: '100vh',
+    zIndex: '0',
+    pointerEvents: 'none'
+  });
+  canvas.after(coverCanvas);   // right after #ticker-bg: above the rows, below content
+  const coverCtx = coverCanvas.getContext('2d', { alpha: true });
+
   // === STATE ================================================================
   let DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
   let W = 0, H = 0;
@@ -117,6 +169,24 @@
   let HAS_REAL_QUOTES = false;
   // The tight cover region (device pixels)
   let cover = null;
+
+  // Hover-to-pop state. Because the canvas is 3D-transformed via CSS, we invert
+  // that transform to map the mouse into canvas space and hit-test quotes.
+  let lastMouse = null;          // {x, y} in client (viewport) px
+  let hoverMatrix = null;        // DOMMatrix of the canvas' CSS transform
+  let originX = 0, originY = 0;  // transform-origin in CSS px
+  let hoverLift = 0;             // eased 0..1 pop amount
+  let hoverTarget = null;        // the quote currently (or last) under the cursor
+  let hoverSym = null;           // ticker symbol currently being dwelled on
+  let hoverElapsed = 0;          // seconds dwelled on the current quote (0..LOAD_SECS)
+  let dwellStart = 0;            // performance.now() when the current dwell began
+  let lastSeenTime = 0;          // performance.now() a quote was last under the cursor
+  let overSince = 0;             // performance.now() the cursor first went over a quote
+  let previewShown = false;      // is the preview bubble visible
+  let previewEl = null;          // the preview bubble DOM element
+  let previewUrl = null;         // URL the bubble opens on click
+  let hoveringPreview = false;   // is the cursor over the bubble itself
+  let previewIdleStart = 0;      // performance.now() since leaving quote + bubble
 
   // ---------- Stock price simulation ----------------------------------------
   function seedPrice(sym) {
@@ -196,11 +266,24 @@
       bitmapCtx.fillStyle = COLOR_CODE;
       bitmapCtx.fillText(row.text, padding, baseline);
     } else {
+      // parts come in groups of 4: [sym, price, arrow%, separator]. Record each
+      // quote's hit region (sym+price+arrow, excluding the separator) in content
+      // coordinates measured from the text start (screen x = row.x + contentX).
+      row.groups = [];
       let dx = padding;
-      row.parts.forEach(segment => {
+      row.parts.forEach((segment, i) => {
         bitmapCtx.fillStyle = segment.color;
         bitmapCtx.fillText(segment.text, dx, baseline);
-        dx += bitmapCtx.measureText(segment.text).width;
+        const w = bitmapCtx.measureText(segment.text).width;
+        const contentX = dx - padding;
+        const slot = i % 4;
+        if (slot === 0) row.groups.push({ x0: contentX, x1: contentX, segs: [], sym: segment.text.trim() });
+        if (slot < 3) {
+          const g = row.groups[row.groups.length - 1];
+          g.segs.push(segment);
+          g.x1 = contentX + w;
+        }
+        dx += w;
       });
     }
 
@@ -292,20 +375,263 @@
 
   // ---------- Paint a soft cover over the content area -----------------------
   function coverContentArea() {
+    // Drawn on the separate, non-rotated overlay so the cover hugs the upright
+    // text (the main ticker canvas is rotated via CSS).
+    coverCtx.clearRect(0, 0, W, H);
     if (!cover || !ENABLE_FADE_COVER) return;
 
-    ctx.save();
-    ctx.globalAlpha = FEATHER_OPACITY;
+    coverCtx.save();
+    coverCtx.globalAlpha = FEATHER_OPACITY;
 
-    const g = ctx.createLinearGradient(0, cover.y, 0, cover.y + cover.h);
+    const g = coverCtx.createLinearGradient(0, cover.y, 0, cover.y + cover.h);
     g.addColorStop(0,   WASH_TOP);
     g.addColorStop(0.5, WASH_MID);
     g.addColorStop(1,   WASH_BOTTOM);
-    ctx.fillStyle = g;
+    coverCtx.fillStyle = g;
 
-    roundedRectPath(ctx, cover.x, cover.y, cover.w, cover.h, cover.r);
-    ctx.fill();
+    roundedRectPath(coverCtx, cover.x, cover.y, cover.w, cover.h, cover.r);
+    coverCtx.fill();
+    coverCtx.restore();
+  }
+
+  // ---------- Hover-to-pop: map the mouse through the CSS 3D transform --------
+  function refreshHoverMatrix() {
+    const t = getComputedStyle(canvas).transform;
+    try { hoverMatrix = new DOMMatrix(t === 'none' ? '' : t); }
+    catch (e) { hoverMatrix = new DOMMatrix(); }
+    originX = window.innerWidth / 2;
+    originY = window.innerHeight / 2;
+  }
+
+  // Invert the transform for the z=0 plane: solve for the canvas-space point
+  // (device px) that projects to the current mouse position.
+  function mouseToCanvas() {
+    if (!lastMouse || !hoverMatrix) return null;
+    const m = hoverMatrix;
+    const u = lastMouse.x - originX;
+    const v = lastMouse.y - originY;
+    const A11 = m.m11 - u * m.m14, A12 = m.m21 - u * m.m24, B1 = u * m.m44 - m.m41;
+    const A21 = m.m12 - v * m.m14, A22 = m.m22 - v * m.m24, B2 = v * m.m44 - m.m42;
+    const det = A11 * A22 - A12 * A21;
+    if (Math.abs(det) < 1e-6) return null;
+    const a = (B1 * A22 - A12 * B2) / det;
+    const b = (A11 * B2 - B1 * A21) / det;
+    return { mx: (a + originX) * DPR, my: (b + originY) * DPR };
+  }
+
+  // Which quote (if any) is under the cursor. Binary/code rows are ignored.
+  function findHoveredQuote() {
+    const p = mouseToCanvas();
+    if (!p) return null;
+    const { mx, my } = p;
+    for (const row of rows) {
+      if (row.type !== 'stock' || !row.groups) continue;
+      if (my < row.y - fontPx || my > row.y + fontPx * 0.2) continue;
+      const cx = mx - row.x;                 // content coord (from text start)
+      if (cx < 0 || cx > row.width) continue;
+      for (const g of row.groups) {
+        if (cx >= g.x0 && cx <= g.x1) {
+          return {
+            sym: g.sym,
+            segs: g.segs,
+            centerX: row.x + (g.x0 + g.x1) / 2,
+            midY: row.y - fontPx * 0.35,
+            // Base quote rect (canvas px) so we can hide the original.
+            bx0: row.x + g.x0,
+            bx1: row.x + g.x1,
+            byTop: row.y - fontPx,
+            byBot: row.y + fontPx * 0.35
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  // Draw the hovered quote enlarged + glowing so it "pops" toward the viewer.
+  function drawHoverPop(target, dt) {
+    if (target) hoverTarget = target;
+    hoverLift += ((target ? 1 : 0) - hoverLift) * Math.min(1, dt * 9);
+    if (!hoverTarget || hoverLift < 0.02) return;
+
+    // Hide the original quote by repainting the background over it, so only the
+    // lifted copy is visible (no doubled/ghosted quote underneath).
+    const padX = fontPx * 0.18;
+    ctx.fillStyle = backgroundGradient;
+    ctx.fillRect(hoverTarget.bx0 - padX, hoverTarget.byTop,
+                 (hoverTarget.bx1 - hoverTarget.bx0) + padX * 2,
+                 hoverTarget.byBot - hoverTarget.byTop);
+
+    const f = fontPx * (1 + 0.42 * hoverLift);
+    ctx.save();
+    ctx.font = `${f}px ${FONT_FAMILY}`;
+    ctx.textBaseline = 'alphabetic';
+    let tw = 0;
+    for (const s of hoverTarget.segs) tw += ctx.measureText(s.text).width;
+    let x = hoverTarget.centerX - tw / 2;
+    const baseY = hoverTarget.midY - hoverLift * 7 * DPR + f * 0.35;
+    ctx.shadowBlur = 18 * DPR * hoverLift;
+    for (const s of hoverTarget.segs) {
+      ctx.shadowColor = s.color;
+      ctx.fillStyle = s.color;
+      ctx.fillText(s.text, x, baseY);
+      x += ctx.measureText(s.text).width;
+    }
     ctx.restore();
+  }
+
+  // ---------- Dwell timer: fill the ring, then reveal the preview ------------
+  // Uses wall-clock time (performance.now) rather than accumulated frame deltas,
+  // so the 3s is real regardless of frame rate / throttling.
+  function updateHoverTimer(target, paused) {
+    const now = performance.now();
+
+    // Once the bubble is up it latches in place (stops following the cursor) so
+    // it can be moved onto and clicked. It closes only after the cursor has left
+    // both the source quote and the bubble for a short grace period.
+    if (previewShown) {
+      const stillOnQuote = target && target.sym === hoverSym;
+      if (hoveringPreview || stillOnQuote) {
+        previewIdleStart = now;
+      } else if (now - previewIdleStart > 350) {
+        hidePreview();
+        hoverSym = null;
+        hoverElapsed = 0;
+      }
+      return;
+    }
+
+    // The loader only advances once the tape has actually paused (after the
+    // pre-pause delay). While still scrolling there is no ring progress.
+    if (paused && target) {
+      if (target.sym !== hoverSym) { hoverSym = target.sym; dwellStart = now; }
+      hoverElapsed = (now - dwellStart) / 1000;
+      if (hoverElapsed >= LOAD_SECS) showPreview(target.sym);
+    } else {
+      hoverSym = null;
+      hoverElapsed = 0;
+    }
+  }
+
+  // ---------- Loader ring around the cursor (drawn on the flat overlay) ------
+  function drawHoverRing(paused) {
+    if (previewShown || !paused || !lastMouse) return;
+    const cx = lastMouse.x * DPR, cy = lastMouse.y * DPR;
+    const R = 20 * DPR;
+
+    coverCtx.save();
+    coverCtx.lineWidth = 3 * DPR;
+    coverCtx.strokeStyle = 'rgba(210,235,222,0.22)';   // faint track
+    coverCtx.beginPath();
+    coverCtx.arc(cx, cy, R, 0, Math.PI * 2);
+    coverCtx.stroke();
+
+    const prog = Math.min(1, hoverElapsed / LOAD_SECS);  // filling arc
+    coverCtx.strokeStyle = '#2ee38f';
+    coverCtx.lineCap = 'round';
+    coverCtx.beginPath();
+    coverCtx.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2);
+    coverCtx.stroke();
+    coverCtx.restore();
+  }
+
+  // ---------- Website preview bubble -----------------------------------------
+  // Screenshot providers, tried in order (no API key needed). Microlink returns
+  // a clean full-page screenshot; thum.io is the fallback; then a text card.
+  const SHOT_PROVIDERS = [
+    (u) => 'https://api.microlink.io/?url=' + encodeURIComponent(u) +
+           '&screenshot=true&meta=false&embed=screenshot.url',
+    (u) => 'https://image.thum.io/get/width/800/noanimate/' + u
+  ];
+
+  function ensurePreviewEl() {
+    if (previewEl) return previewEl;
+    previewEl = document.createElement('div');
+    previewEl.id = 'ticker-preview';
+    Object.assign(previewEl.style, {
+      position: 'fixed', width: '260px', zIndex: '10000', pointerEvents: 'auto',
+      cursor: 'pointer',
+      background: 'rgba(8,20,13,0.96)', border: '1px solid rgba(140,230,180,0.35)',
+      borderRadius: '12px', overflow: 'hidden',
+      boxShadow: '0 18px 44px rgba(0,0,0,0.5)',
+      opacity: '0', transition: 'opacity 220ms ease', fontFamily: FONT_FAMILY
+    });
+    const img = document.createElement('img');
+    img.id = 'ticker-preview-img';
+    Object.assign(img.style, {
+      display: 'block', width: '100%', height: '160px',
+      objectFit: 'cover', background: '#04120a'
+    });
+    img.onerror = () => {                                  // try next provider, else text
+      const el = previewEl;
+      if (!el || !el._siteUrl) { img.style.display = 'none'; return; }
+      el._shotIdx = (el._shotIdx || 0) + 1;
+      if (el._shotIdx < SHOT_PROVIDERS.length) {
+        img.style.display = 'block';
+        img.src = SHOT_PROVIDERS[el._shotIdx](el._siteUrl);
+      } else {
+        img.style.display = 'none';
+      }
+    };
+    const cap = document.createElement('div');
+    cap.id = 'ticker-preview-cap';
+    Object.assign(cap.style, {
+      padding: '8px 11px', fontSize: '12px', color: '#d6e4da',
+      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+    });
+    previewEl.appendChild(img);
+    previewEl.appendChild(cap);
+
+    // The bubble latches open so it can be moved onto and clicked.
+    previewEl.addEventListener('mouseenter', () => { hoveringPreview = true; });
+    previewEl.addEventListener('mouseleave', () => { hoveringPreview = false; });
+    previewEl.addEventListener('click', () => {
+      if (previewUrl) window.open(previewUrl, '_blank', 'noopener,noreferrer');
+    });
+
+    document.body.appendChild(previewEl);
+    return previewEl;
+  }
+
+  function showPreview(sym) {
+    const url = SITES[sym];
+    if (!url) return;
+    const el = ensurePreviewEl();
+    const img = el.querySelector('#ticker-preview-img');
+    const cap = el.querySelector('#ticker-preview-cap');
+    let host; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { host = url; }
+    previewUrl = url;
+    el._siteUrl = url;
+    el._shotIdx = 0;
+    img.style.display = 'block';
+    img.src = SHOT_PROVIDERS[0](url);
+    cap.textContent = `${sym}  ·  ${host}  ·  click to open ↗`;
+    positionPreview();                 // placed once, then latched (does not follow)
+    el.style.pointerEvents = 'auto';
+    el.style.display = 'block';
+    requestAnimationFrame(() => { el.style.opacity = '1'; });
+    previewShown = true;
+    previewIdleStart = performance.now();
+  }
+
+  function hidePreview() {
+    if (previewEl) {
+      previewEl.style.opacity = '0';
+      previewEl.style.pointerEvents = 'none';  // don't capture clicks while hidden
+    }
+    previewShown = false;
+    hoveringPreview = false;
+  }
+
+  function positionPreview() {
+    if (!previewEl || !lastMouse) return;
+    const pad = 20, w = 260, h = 200;
+    let x = lastMouse.x + pad;
+    let y = lastMouse.y + pad;
+    if (x + w > window.innerWidth - 8) x = lastMouse.x - w - pad;
+    if (y + h > window.innerHeight - 8) y = window.innerHeight - h - 8;
+    previewEl.style.left = Math.max(8, x) + 'px';
+    previewEl.style.top = Math.max(8, y) + 'px';
   }
 
   // ---------- Fit canvas to viewport + rebuild rows --------------------------
@@ -318,6 +644,12 @@
     canvas.style.width  = cssW + 'px';
     canvas.style.height = cssH + 'px';
     W = canvas.width; H = canvas.height;
+
+    // Keep the (non-rotated) cover overlay in lock-step with the main canvas.
+    coverCanvas.width  = W;
+    coverCanvas.height = H;
+    coverCanvas.style.width  = cssW + 'px';
+    coverCanvas.style.height = cssH + 'px';
 
     fontPx = Math.floor(BASE_FONT_PX * DPR);
     ctx.font = `${fontPx}px ${FONT_FAMILY}`;
@@ -343,6 +675,7 @@
     }
 
     computeCoverArea();
+    refreshHoverMatrix();
 
     if (USE_DARK_CONTENT)
       document.documentElement.classList.add('ticker-dark');
@@ -361,8 +694,19 @@
     ctx.fillStyle = backgroundGradient;
     ctx.fillRect(0, 0, W, H);
 
+    // Resolve the hovered quote once; pause the tape while a quote is hovered so
+    // the loader ring can fill on a stationary target.
+    const target = findHoveredQuote();
+    const now2 = performance.now();
+    // Track continuous time over any quote (tolerating the tiny gaps between
+    // quotes). The tape only freezes after PAUSE_DELAY of continuous hovering.
+    if (target) { if (overSince === 0) overSince = now2; lastSeenTime = now2; }
+    else if (overSince !== 0 && now2 - lastSeenTime > 250) overSince = 0;
+    const paused = !previewShown && overSince !== 0 && (now2 - overSince >= PAUSE_DELAY);
+    updateHoverTimer(target, paused);
+
     rows.forEach(row => {
-      row.x += row.speed * DPR * dt;
+      if (!paused) row.x += row.speed * DPR * dt;
       const sx = row.x;
 
       if (row.type === 'code') {
@@ -384,7 +728,9 @@
       }
     });
 
+    drawHoverPop(target, dt);
     coverContentArea();
+    drawHoverRing(paused);
 
     requestAnimationFrame(tick);
   }
@@ -394,17 +740,25 @@
 
   function handleVisibilityChange() { last = performance.now(); }
   function handleResize() { fit(); computeCoverArea(); }
+  function handleMouseMove(e) { lastMouse = { x: e.clientX, y: e.clientY }; }
+  function handleMouseOut(e) { if (!e.relatedTarget) lastMouse = null; }
 
   document.addEventListener('visibilitychange', handleVisibilityChange);
   window.addEventListener('resize', handleResize, { passive: true });
-  window.addEventListener('load',  () => { computeCoverArea(); }, { once: true });
+  window.addEventListener('mousemove', handleMouseMove, { passive: true });
+  window.addEventListener('mouseout', handleMouseOut, { passive: true });
+  window.addEventListener('load',  () => { computeCoverArea(); refreshHoverMatrix(); }, { once: true });
 
   window.__tickerBackground = {
     destroy() {
       running = false;
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseout', handleMouseOut);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       canvas.remove();
+      coverCanvas.remove();
+      previewEl?.remove();
       document.getElementById('quote-timestamp')?.remove();
       document.documentElement.classList.remove('ticker-dark');
       if (window.__tickerBackground === this) delete window.__tickerBackground;
