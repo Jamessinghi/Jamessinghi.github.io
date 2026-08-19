@@ -96,6 +96,11 @@ html, body, .md-main, .md-content, .md-typeset {
   height: 100vh !important;
   z-index: 0 !important;
   pointer-events: none !important;
+  /* Tilt the whole ticker in 3D so the right-hand side lifts off the page
+     toward the viewer while the left recedes into it. The scale keeps the
+     projected plane covering the viewport (no background through the corners). */
+  transform: perspective(1100px) rotateY(-20deg) scale(1.55) !important;
+  transform-origin: center center !important;
 }
 
 /* Light text when the ticker asks for dark content */
