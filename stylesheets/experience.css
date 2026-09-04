@@ -119,37 +119,10 @@ body.route-home .md-tabs__link,
 body.route-projects .md-tabs__link,
 body.route-engineering .md-tabs__link,
 body.route-resume .md-tabs__link {
-  position: relative;
   font-family: var(--experience-mono);
   font-size: 0.63rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-
-body.route-home .md-tabs__link::after,
-body.route-projects .md-tabs__link::after,
-body.route-engineering .md-tabs__link::after,
-body.route-resume .md-tabs__link::after {
-  content: "";
-  position: absolute;
-  right: 0.8rem;
-  bottom: 0.34rem;
-  left: 0.8rem;
-  height: 1px;
-  background: var(--experience-green);
-  transform: scaleX(0);
-  transition: transform 180ms ease;
-}
-
-body.route-home .md-tabs__link:hover::after,
-body.route-projects .md-tabs__link:hover::after,
-body.route-engineering .md-tabs__link:hover::after,
-body.route-resume .md-tabs__link:hover::after,
-body.route-home .md-tabs__item--active .md-tabs__link::after,
-body.route-projects .md-tabs__item--active .md-tabs__link::after,
-body.route-engineering .md-tabs__item--active .md-tabs__link::after,
-body.route-resume .md-tabs__item--active .md-tabs__link::after {
-  transform: scaleX(1);
 }
 
 /* ========================================================================== 
