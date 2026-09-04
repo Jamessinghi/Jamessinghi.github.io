@@ -970,13 +970,9 @@ body.site-arriving .market-console { animation-delay: 90ms; }
   font-family: var(--experience-display);
   font-size: clamp(3rem, 8.5vw, 6.8rem);
   font-weight: 850;
-  letter-spacing: -.075em;
+  letter-spacing: -.018em;
   line-height: .88;
   text-align: left;
-}
-
-.md-typeset .project-world-hero h1 {
-  letter-spacing: -.035em;
 }
 
 .project-world-hero > p:not(.project-world-hero__eyebrow) {
