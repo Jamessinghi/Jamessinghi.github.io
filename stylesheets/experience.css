@@ -110,7 +110,8 @@ body.route-resume .md-main__inner {
 body.route-home .md-header__title,
 body.route-projects .md-header__title,
 body.route-engineering .md-header__title,
-body.route-resume .md-header__title {
+body.route-resume .md-header__title,
+body.route-contact .md-header__title {
   font-family: var(--experience-mono);
   letter-spacing: 0.03em;
 }
@@ -118,7 +119,8 @@ body.route-resume .md-header__title {
 body.route-home .md-tabs__link,
 body.route-projects .md-tabs__link,
 body.route-engineering .md-tabs__link,
-body.route-resume .md-tabs__link {
+body.route-resume .md-tabs__link,
+body.route-contact .md-tabs__link {
   font-family: var(--experience-mono);
   font-size: 0.63rem;
   letter-spacing: 0.12em;
