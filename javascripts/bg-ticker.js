@@ -15,10 +15,8 @@
    Hover interaction (quotes only — binary rows are ignored)
    1. Hovering a quote pops it: it is redrawn enlarged + glowing, and the
       original underneath is erased so there is no doubled/ghosted copy.
-   2. After PAUSE_DELAY ms of continuous hovering, the tape freezes on the quote.
-   3. A loader ring around the cursor then fills over LOAD_SECS seconds
-      (wall-clock based, so it is frame-rate independent).
-   4. On completion a website-preview bubble appears (screenshot via Microlink,
+   2. A short loader ring fills while the quote keeps travelling left-to-right.
+   3. On completion a website-preview bubble appears (screenshot via Microlink,
       falling back to thum.io, then a text card). The bubble latches in place,
       can be moused onto, and opens the company site in a new tab on click.
       Ticker→website map lives in SITES; prices come from the hourly quote file.
@@ -116,8 +114,7 @@
     TSLA:  'https://www.tesla.com/en_au',
     MSFT:  'https://www.microsoft.com/'   // default (not supplied); change if desired
   };
-  const LOAD_SECS = 3;      // seconds to fill the loader ring before the preview
-  const PAUSE_DELAY = 350;  // ms hovering a quote before the tape freezes
+  const LOAD_SECS = 0.65;   // brief dwell; the tape continues moving throughout
 
   // Fade-under-content configuration
   const ENABLE_FADE_COVER = true;      // draw a cover over content instead of cutting a hole
@@ -180,8 +177,6 @@
   let hoverSym = null;           // ticker symbol currently being dwelled on
   let hoverElapsed = 0;          // seconds dwelled on the current quote (0..LOAD_SECS)
   let dwellStart = 0;            // performance.now() when the current dwell began
-  let lastSeenTime = 0;          // performance.now() a quote was last under the cursor
-  let overSince = 0;             // performance.now() the cursor first went over a quote
   let previewShown = false;      // is the preview bubble visible
   let previewEl = null;          // the preview bubble DOM element
   let previewUrl = null;         // URL the bubble opens on click
@@ -476,9 +471,9 @@
   }
 
   // ---------- Dwell timer: fill the ring, then reveal the preview ------------
-  // Uses wall-clock time (performance.now) rather than accumulated frame deltas,
-  // so the 3s is real regardless of frame rate / throttling.
-  function updateHoverTimer(target, paused) {
+  // Uses wall-clock time so the dwell remains consistent at every frame rate.
+  // Crucially, this never changes the motion state of the tape.
+  function updateHoverTimer(target) {
     const now = performance.now();
 
     // Once the bubble is up it latches in place (stops following the cursor) so
@@ -496,9 +491,7 @@
       return;
     }
 
-    // The loader only advances once the tape has actually paused (after the
-    // pre-pause delay). While still scrolling there is no ring progress.
-    if (paused && target) {
+    if (target) {
       if (target.sym !== hoverSym) { hoverSym = target.sym; dwellStart = now; }
       hoverElapsed = (now - dwellStart) / 1000;
       if (hoverElapsed >= LOAD_SECS) showPreview(target.sym);
@@ -509,8 +502,8 @@
   }
 
   // ---------- Loader ring around the cursor (drawn on the flat overlay) ------
-  function drawHoverRing(paused) {
-    if (previewShown || !paused || !lastMouse) return;
+  function drawHoverRing(target) {
+    if (previewShown || !target || !lastMouse) return;
     const cx = lastMouse.x * DPR, cy = lastMouse.y * DPR;
     const R = 20 * DPR;
 
@@ -689,19 +682,12 @@
     ctx.fillStyle = backgroundGradient;
     ctx.fillRect(0, 0, W, H);
 
-    // Resolve the hovered quote once; pause the tape while a quote is hovered so
-    // the loader ring can fill on a stationary target.
+    // Resolve hover interaction without ever changing the tape's motion.
     const target = findHoveredQuote();
-    const now2 = performance.now();
-    // Track continuous time over any quote (tolerating the tiny gaps between
-    // quotes). The tape only freezes after PAUSE_DELAY of continuous hovering.
-    if (target) { if (overSince === 0) overSince = now2; lastSeenTime = now2; }
-    else if (overSince !== 0 && now2 - lastSeenTime > 250) overSince = 0;
-    const paused = !previewShown && overSince !== 0 && (now2 - overSince >= PAUSE_DELAY);
-    updateHoverTimer(target, paused);
+    updateHoverTimer(target);
 
     rows.forEach(row => {
-      if (!paused) row.x += row.speed * DPR * dt;
+      row.x += row.speed * DPR * dt;
       const sx = row.x;
 
       if (row.type === 'code') {
@@ -725,7 +711,7 @@
 
     drawHoverPop(target, dt);
     coverContentArea();
-    drawHoverRing(paused);
+    drawHoverRing(target);
 
     requestAnimationFrame(tick);
   }
