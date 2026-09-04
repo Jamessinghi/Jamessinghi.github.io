@@ -1,22 +1,37 @@
-/* Scroll-driven aircraft-carrier flight deck for the resume route. */
+/* Photoreal, scroll-driven aircraft-carrier world for the resume route. */
 (function () {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (document.getElementById('carrier-world')) return;
+
+  const currentScript = document.currentScript && document.currentScript.src
+    ? document.currentScript.src
+    : new URL('javascripts/bg-carrier.js', window.location.href).href;
+  const READY_SCENE = new URL('../assets/images/carrier-storm-ready-v1.webp', currentScript).href;
+  const AIRBORNE_SCENE = new URL('../assets/images/carrier-storm-airborne-v1.webp', currentScript).href;
 
   const canvas = document.createElement('canvas');
   canvas.id = 'carrier-world';
   canvas.setAttribute('aria-hidden', 'true');
   document.body.prepend(canvas);
+  document.body.classList.add('carrier-cinematic');
   const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
 
   const hud = document.createElement('div');
   hud.className = 'carrier-hud';
   hud.setAttribute('aria-hidden', 'true');
-  hud.innerHTML = '<div class="carrier-hud__top"><span class="carrier-hud__status">CATAPULT / STANDBY</span><i></i></div><div class="carrier-hud__meter"><span></span></div>';
+  hud.innerHTML = `
+    <div class="carrier-hud__top"><span class="carrier-hud__status">CATAPULT / STANDBY</span><i></i></div>
+    <div class="carrier-hud__telemetry"><span class="carrier-hud__speed">000 KTS</span><span class="carrier-hud__altitude">DECK</span></div>
+    <div class="carrier-hud__meter"><span></span></div>`;
   document.body.appendChild(hud);
+
   const status = hud.querySelector('.carrier-hud__status');
+  const speedReadout = hud.querySelector('.carrier-hud__speed');
+  const altitudeReadout = hud.querySelector('.carrier-hud__altitude');
   const meter = hud.querySelector('.carrier-hud__meter span');
 
+  const readyImage = loadImage(READY_SCENE);
+  const airborneImage = loadImage(AIRBORNE_SCENE);
   const TAU = Math.PI * 2;
   let width = 0;
   let height = 0;
@@ -25,17 +40,64 @@
   let targetProgress = 0;
   let pointerX = .5;
   let pointerY = .5;
+  let targetPointerX = .5;
+  let targetPointerY = .5;
   let running = true;
   let frameId = 0;
   let last = performance.now();
-  let stars = [];
+  let rain = [];
+  let lensDrops = [];
+  let nextLightning = performance.now() + 2600 + Math.random() * 3200;
+  let lightning = null;
+  let lastNoisePaint = 0;
+
+  const noiseCanvas = document.createElement('canvas');
+  noiseCanvas.width = 150;
+  noiseCanvas.height = 84;
+  const noiseCtx = noiseCanvas.getContext('2d', { alpha: true });
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const lerp = (a, b, t) => a + (b - a) * t;
-  const smooth = t => t * t * (3 - 2 * t);
+  const lerp = (a, b, amount) => a + (b - a) * amount;
+  const smooth = value => value * value * (3 - 2 * value);
+  const smoothRange = (start, end, value) => smooth(clamp((value - start) / (end - start), 0, 1));
+
+  function loadImage(source) {
+    const image = new Image();
+    image.decoding = 'async';
+    image.loaded = false;
+    image.addEventListener('load', () => {
+      image.loaded = true;
+      document.body.classList.add('carrier-imagery-ready');
+    });
+    image.src = source;
+    return image;
+  }
+
+  function buildAtmosphere() {
+    const rainCount = Math.min(360, Math.max(150, Math.round(width * height / 5200)));
+    rain = Array.from({ length: rainCount }, () => {
+      const depth = .25 + Math.random() * .75;
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        depth,
+        length: lerp(7, 29, depth) * (.7 + Math.random() * .55),
+        speed: lerp(260, 820, depth),
+        alpha: lerp(.06, .3, depth) * (.55 + Math.random() * .45)
+      };
+    });
+
+    lensDrops = Array.from({ length: width < 700 ? 4 : 8 }, (_, index) => ({
+      x: (.08 + Math.random() * .84) * width,
+      y: (.08 + Math.random() * .7) * height,
+      radius: 10 + Math.random() * 29,
+      alpha: .018 + Math.random() * .025,
+      phase: index * 1.71
+    }));
+  }
 
   function fit() {
-    dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    dpr = Math.max(1, Math.min(1.5, window.devicePixelRatio || 1));
     width = window.innerWidth;
     height = window.innerHeight;
     canvas.width = Math.round(width * dpr);
@@ -43,9 +105,9 @@
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    stars = Array.from({ length: Math.min(90, Math.max(30, Math.round(width / 13))) }, (_, index) => ({
-      x: Math.random(), y: Math.random() * .42, a: .12 + Math.random() * .38, phase: index * .71
-    }));
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    buildAtmosphere();
     updateScroll();
   }
 
@@ -53,274 +115,323 @@
     const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     targetProgress = clamp(window.scrollY / max, 0, 1);
     meter.style.width = `${(targetProgress * 100).toFixed(1)}%`;
+
     if (targetProgress < .08) status.textContent = 'CATAPULT / STANDBY';
-    else if (targetProgress < .58) status.textContent = `TAXI / ${String(Math.round(targetProgress / .58 * 100)).padStart(2, '0')}%`;
-    else if (targetProgress < .72) status.textContent = 'AFTERBURNER / ARMED';
-    else if (targetProgress < .9) status.textContent = 'AIRBORNE / CLIMB';
+    else if (targetProgress < .46) status.textContent = `LAUNCH BAR / ${String(Math.round(targetProgress / .46 * 100)).padStart(2, '0')}%`;
+    else if (targetProgress < .61) status.textContent = 'CATAPULT / TENSION';
+    else if (targetProgress < .79) status.textContent = 'AFTERBURNER / IGNITION';
+    else if (targetProgress < .93) status.textContent = 'AIRBORNE / POSITIVE RATE';
     else status.textContent = 'MISSION / ACTIVE';
+
+    const knots = Math.round(smoothRange(.1, .82, targetProgress) * 178);
+    const altitude = targetProgress < .72 ? 'DECK' : `${Math.round(smoothRange(.72, 1, targetProgress) * 2400)} FT`;
+    speedReadout.textContent = `${String(knots).padStart(3, '0')} KTS`;
+    altitudeReadout.textContent = altitude;
   }
 
-  function drawSky(now, horizon) {
-    const sky = ctx.createLinearGradient(0, 0, 0, horizon + 2);
-    sky.addColorStop(0, '#050a13');
-    sky.addColorStop(.47, '#17283a');
-    sky.addColorStop(.76, '#4f5360');
-    sky.addColorStop(1, '#c56f48');
+  function drawFallback() {
+    const sky = ctx.createLinearGradient(0, 0, 0, height);
+    sky.addColorStop(0, '#0b1824');
+    sky.addColorStop(.52, '#334756');
+    sky.addColorStop(.53, '#101d26');
+    sky.addColorStop(1, '#03070b');
     ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, width, horizon + 2);
+    ctx.fillRect(0, 0, width, height);
+  }
 
-    const dusk = ctx.createRadialGradient(width * .77, horizon * .92, 0, width * .77, horizon * .92, width * .34);
-    dusk.addColorStop(0, 'rgba(255, 180, 101, .30)');
-    dusk.addColorStop(.3, 'rgba(255, 115, 73, .09)');
-    dusk.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = dusk;
-    ctx.fillRect(0, 0, width, horizon + 10);
-
-    stars.forEach(star => {
-      const twinkle = star.a + Math.sin(now * .001 + star.phase) * .07;
-      ctx.fillStyle = `rgba(219,237,255,${twinkle})`;
-      ctx.fillRect(star.x * width + (pointerX - .5) * 10, star.y * height + (pointerY - .5) * 5, 1, 1);
-    });
+  function drawCoverImage(image, options) {
+    if (!image.loaded || !image.naturalWidth) return null;
+    const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * options.zoom;
+    const drawWidth = image.naturalWidth * scale;
+    const drawHeight = image.naturalHeight * scale;
+    const x = (width - drawWidth) * .5 + options.panX;
+    const y = (height - drawHeight) * .5 + options.panY;
 
     ctx.save();
-    ctx.globalAlpha = .16;
-    ctx.fillStyle = '#121821';
-    for (let i = 0; i < 8; i++) {
-      const cx = ((i * 193 + now * .003 * (i % 2 ? 1 : -1)) % (width + 260)) - 130;
-      const cy = horizon * (.32 + (i % 3) * .12);
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, 90 + (i % 3) * 40, 11 + (i % 2) * 7, 0, 0, TAU);
-      ctx.fill();
-    }
+    ctx.globalAlpha = options.alpha;
+    ctx.filter = options.filter;
+    ctx.drawImage(image, x, y, drawWidth, drawHeight);
     ctx.restore();
+    return { x, y, width: drawWidth, height: drawHeight };
   }
 
-  function drawOcean(now, horizon) {
-    const ocean = ctx.createLinearGradient(0, horizon, 0, height);
-    ocean.addColorStop(0, '#1a3040');
-    ocean.addColorStop(.3, '#0b202d');
-    ocean.addColorStop(1, '#030a10');
-    ctx.fillStyle = ocean;
-    ctx.fillRect(0, horizon, width, height - horizon);
-
-    ctx.save();
-    ctx.lineWidth = 1;
-    for (let row = 0; row < 28; row++) {
-      const t = row / 27;
-      const y = horizon + Math.pow(t, 1.65) * (height - horizon);
-      const gap = lerp(65, 240, t);
-      const speed = now * (.004 + t * .009);
-      ctx.strokeStyle = `rgba(132, 198, 220, ${.025 + t * .08})`;
-      ctx.beginPath();
-      for (let x = -gap; x < width + gap; x += gap) {
-        const start = x + (speed % gap);
-        ctx.moveTo(start, y);
-        ctx.lineTo(start + gap * (.23 + (row % 3) * .06), y + Math.sin(row + now * .001) * 1.2);
-      }
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  function deckEdges(horizon) {
-    const vanishX = width * (.5 + (pointerX - .5) * .025);
-    const farY = horizon - 2;
-    const nearY = height * 1.05;
-    const farHalf = Math.max(12, width * .016);
-    const nearHalf = width * .43;
-    return { vanishX, farY, nearY, farHalf, nearHalf };
-  }
-
-  function deckPoint(edges, t, offset) {
-    const depth = Math.pow(clamp(t, 0, 1), 1.42);
-    const y = lerp(edges.farY, edges.nearY, depth);
-    const half = lerp(edges.farHalf, edges.nearHalf, depth);
-    return { x: edges.vanishX + half * (offset || 0), y, half, scale: lerp(.18, 1.08, depth) };
-  }
-
-  function drawCarrier(horizon, now) {
-    const e = deckEdges(horizon);
-    ctx.save();
-
-    const deck = ctx.createLinearGradient(0, e.farY, 0, e.nearY);
-    deck.addColorStop(0, '#4a5052');
-    deck.addColorStop(.45, '#242a2d');
-    deck.addColorStop(1, '#0c1114');
-    ctx.fillStyle = deck;
-    ctx.beginPath();
-    ctx.moveTo(e.vanishX - e.farHalf, e.farY);
-    ctx.lineTo(e.vanishX + e.farHalf, e.farY);
-    ctx.lineTo(e.vanishX + e.nearHalf, e.nearY);
-    ctx.lineTo(e.vanishX - e.nearHalf, e.nearY);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.strokeStyle = 'rgba(197,217,220,.24)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.fillStyle = 'rgba(232,222,185,.68)';
-    for (let i = 0; i < 17; i++) {
-      const t = .04 + i * .057;
-      const p = deckPoint(e, t, -.1);
-      const next = deckPoint(e, t + .025, -.1);
-      const w = Math.max(1, p.scale * 2.1);
-      ctx.beginPath();
-      ctx.moveTo(p.x - w, p.y);
-      ctx.lineTo(p.x + w, p.y);
-      ctx.lineTo(next.x + w * 1.2, next.y);
-      ctx.lineTo(next.x - w * 1.2, next.y);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    ctx.strokeStyle = 'rgba(255,202,100,.46)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    for (let i = 0; i <= 30; i++) {
-      const p = deckPoint(e, i / 30, -.58);
-      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
-    }
-    ctx.stroke();
-
-    ctx.fillStyle = '#11181b';
-    const island = deckPoint(e, .46, .7);
-    ctx.fillRect(island.x - 10 * island.scale, island.y - 48 * island.scale, 29 * island.scale, 49 * island.scale);
-    ctx.fillStyle = '#1f292c';
-    ctx.fillRect(island.x - 5 * island.scale, island.y - 67 * island.scale, 18 * island.scale, 22 * island.scale);
-    ctx.strokeStyle = 'rgba(215,234,233,.38)';
-    ctx.beginPath();
-    ctx.moveTo(island.x + 4 * island.scale, island.y - 67 * island.scale);
-    ctx.lineTo(island.x + 4 * island.scale, island.y - 91 * island.scale);
-    ctx.stroke();
-
-    const wakeOffset = Math.sin(now * .002) * 2;
-    ctx.strokeStyle = 'rgba(185,224,231,.11)';
-    for (let side of [-1, 1]) {
-      ctx.beginPath();
-      ctx.moveTo(e.vanishX + side * e.farHalf, e.farY);
-      ctx.quadraticCurveTo(e.vanishX + side * width * .32, height * .72, e.vanishX + side * width * .58 + wakeOffset, height);
-      ctx.stroke();
-    }
-    ctx.restore();
-    return e;
-  }
-
-  function jetState(edges) {
-    if (progress < .7) {
-      const roll = smooth(progress / .7);
-      const p = deckPoint(edges, lerp(.93, .08, roll), -.1);
-      return { x: p.x, y: p.y, scale: p.scale * .84, angle: 0, airborne: 0, thrust: clamp((progress - .42) / .25, 0, 1) };
-    }
-    const flight = smooth((progress - .7) / .3);
+  function imagePoint(metrics, x, y) {
+    if (!metrics) return { x: width * x, y: height * y };
     return {
-      x: lerp(edges.vanishX, width * .69, flight) + (pointerX - .5) * 22,
-      y: lerp(edges.farY - 4, height * .18, flight),
-      scale: lerp(.18, .34, flight),
-      angle: lerp(-.05, -.2, flight),
-      airborne: flight,
-      thrust: 1
+      x: metrics.x + metrics.width * x,
+      y: metrics.y + metrics.height * y
     };
   }
 
-  function drawJet(edges, now) {
-    const jet = jetState(edges);
-    const s = Math.max(.12, jet.scale);
+  function drawEngineGlow(metrics, airborne, strength, now) {
+    if (!metrics || strength <= 0) return;
+    const point = imagePoint(metrics, airborne ? .505 : .5, airborne ? .45 : .535);
+    const pulse = .9 + Math.sin(now * .019) * .1;
+    const radius = Math.max(48, width * (airborne ? .075 : .052)) * pulse;
+    const glow = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
+    glow.addColorStop(0, `rgba(255,245,205,${.19 * strength})`);
+    glow.addColorStop(.13, `rgba(255,167,74,${.22 * strength})`);
+    glow.addColorStop(.48, `rgba(255,91,26,${.075 * strength})`);
+    glow.addColorStop(1, 'rgba(255,69,16,0)');
     ctx.save();
-    ctx.translate(jet.x, jet.y);
-    ctx.rotate(jet.angle);
-    ctx.scale(s, s);
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle = glow;
+    ctx.fillRect(point.x - radius, point.y - radius, radius * 2, radius * 2);
+    ctx.restore();
+  }
 
-    if (jet.thrust > 0) {
-      const flame = ctx.createLinearGradient(0, 30, 0, 104);
-      flame.addColorStop(0, `rgba(255,245,200,${.25 + jet.thrust * .7})`);
-      flame.addColorStop(.28, `rgba(255,137,49,${jet.thrust * .72})`);
-      flame.addColorStop(1, 'rgba(255,70,20,0)');
-      ctx.fillStyle = flame;
+  function drawDeckLightPulse(now, strength) {
+    if (strength <= 0) return;
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    for (let index = 0; index < 13; index++) {
+      const depth = index / 12;
+      const y = lerp(height * .57, height * 1.04, Math.pow(depth, 1.55));
+      const x = width * .5 + (pointerX - .5) * depth * 8;
+      const phase = .35 + .65 * Math.max(0, Math.sin(now * .0045 - index * .72));
+      const radius = lerp(2, 9, depth) * phase;
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * 4.5);
+      glow.addColorStop(0, `rgba(255,246,204,${.65 * phase * strength})`);
+      glow.addColorStop(.18, `rgba(255,164,61,${.42 * phase * strength})`);
+      glow.addColorStop(1, 'rgba(255,115,29,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(x - radius * 5, y - radius * 5, radius * 10, radius * 10);
+    }
+    ctx.restore();
+  }
+
+  function drawLaunchFlash(energy, now) {
+    const intensity = Math.pow(clamp(energy, 0, 1), 2.4);
+    if (intensity < .01) return;
+    const x = width * .5 + Math.sin(now * .04) * intensity * 2;
+    const y = height * .535;
+    const radius = Math.max(100, width * .17);
+    const flash = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    flash.addColorStop(0, `rgba(255,250,226,${.2 * intensity})`);
+    flash.addColorStop(.08, `rgba(255,181,92,${.18 * intensity})`);
+    flash.addColorStop(.38, `rgba(255,103,33,${.07 * intensity})`);
+    flash.addColorStop(1, 'rgba(255,91,20,0)');
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle = flash;
+    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+    ctx.restore();
+  }
+
+  function drawSeaMist(now, launchEnergy) {
+    ctx.save();
+    ctx.filter = 'blur(14px)';
+    ctx.globalCompositeOperation = 'screen';
+    for (let index = 0; index < 5; index++) {
+      const phase = now * (.000025 + index * .000006) + index * 1.3;
+      const x = ((phase * width * 2.2) % (width * 1.5)) - width * .25;
+      const y = height * (.53 + index * .055) + Math.sin(phase * 8) * 12;
+      const radiusX = width * (.12 + index * .018);
+      const radiusY = 15 + index * 7 + launchEnergy * 13;
+      const haze = ctx.createRadialGradient(x, y, 0, x, y, radiusX);
+      haze.addColorStop(0, `rgba(205,226,232,${.035 + launchEnergy * .018})`);
+      haze.addColorStop(1, 'rgba(185,211,222,0)');
+      ctx.fillStyle = haze;
       ctx.beginPath();
-      ctx.moveTo(-6, 24);
-      ctx.quadraticCurveTo(0, 95 + Math.sin(now * .02) * 9, 7, 24);
-      ctx.closePath();
+      ctx.ellipse(x, y, radiusX, radiusY, 0, 0, TAU);
       ctx.fill();
     }
-
-    if (jet.airborne > .08) {
-      ctx.strokeStyle = `rgba(225,239,245,${jet.airborne * .28})`;
-      ctx.lineWidth = 5;
-      ctx.lineCap = 'round';
-      for (let side of [-1, 1]) {
-        ctx.beginPath();
-        ctx.moveTo(side * 7, 28);
-        ctx.lineTo(side * (16 + jet.airborne * 28), 260 + jet.airborne * 180);
-        ctx.stroke();
-      }
-    }
-
-    ctx.shadowColor = 'rgba(255,151,66,.28)';
-    ctx.shadowBlur = jet.thrust * 24;
-    ctx.fillStyle = '#b6c2c6';
-    ctx.strokeStyle = '#edf5f4';
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.moveTo(0, -47);
-    ctx.quadraticCurveTo(10, -28, 8, -3);
-    ctx.lineTo(40, 17);
-    ctx.lineTo(41, 26);
-    ctx.lineTo(10, 18);
-    ctx.lineTo(12, 36);
-    ctx.lineTo(4, 31);
-    ctx.lineTo(0, 43);
-    ctx.lineTo(-4, 31);
-    ctx.lineTo(-12, 36);
-    ctx.lineTo(-10, 18);
-    ctx.lineTo(-41, 26);
-    ctx.lineTo(-40, 17);
-    ctx.lineTo(-8, -3);
-    ctx.quadraticCurveTo(-10, -28, 0, -47);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#192832';
-    ctx.beginPath();
-    ctx.ellipse(0, -19, 5, 13, 0, 0, TAU);
-    ctx.fill();
-    ctx.fillStyle = '#ff9f43';
-    ctx.fillRect(-2, 8, 4, 17);
     ctx.restore();
+  }
+
+  function drawRain(dt) {
+    const wind = -6 + (pointerX - .5) * 13;
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.lineCap = 'round';
+    for (const drop of rain) {
+      drop.y += drop.speed * dt;
+      drop.x += wind * drop.depth * dt;
+      if (drop.y > height + drop.length || drop.x < -40 || drop.x > width + 40) {
+        drop.y = -drop.length - Math.random() * height * .16;
+        drop.x = Math.random() * (width + 80) - 40;
+      }
+      ctx.strokeStyle = `rgba(210,231,239,${drop.alpha})`;
+      ctx.lineWidth = lerp(.35, 1.15, drop.depth);
+      ctx.beginPath();
+      ctx.moveTo(drop.x, drop.y);
+      ctx.lineTo(drop.x + wind * .022, drop.y + drop.length);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawLensDrops(now) {
+    ctx.save();
+    for (const drop of lensDrops) {
+      const shimmer = .74 + Math.sin(now * .0007 + drop.phase) * .26;
+      const gradient = ctx.createRadialGradient(
+        drop.x - drop.radius * .25,
+        drop.y - drop.radius * .3,
+        drop.radius * .08,
+        drop.x,
+        drop.y,
+        drop.radius
+      );
+      gradient.addColorStop(0, `rgba(235,248,250,${drop.alpha * 1.5 * shimmer})`);
+      gradient.addColorStop(.48, 'rgba(160,193,205,0)');
+      gradient.addColorStop(.82, `rgba(190,218,226,${drop.alpha * .55})`);
+      gradient.addColorStop(1, 'rgba(205,231,238,0)');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.ellipse(drop.x, drop.y, drop.radius * .72, drop.radius, -.18, 0, TAU);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function triggerLightning(now) {
+    const x = width * (.17 + Math.random() * .66);
+    const points = [{ x, y: -8 }];
+    let px = x;
+    for (let index = 1; index <= 9; index++) {
+      px += (Math.random() - .5) * width * .022;
+      points.push({ x: px, y: height * .48 * (index / 9) });
+    }
+    lightning = { start: now, points };
+    nextLightning = now + 4600 + Math.random() * 7200;
+  }
+
+  function drawLightning(now) {
+    if (now >= nextLightning) triggerLightning(now);
+    if (!lightning) return;
+    const age = now - lightning.start;
+    if (age > 420) {
+      lightning = null;
+      return;
+    }
+    const flash = age < 72 ? 1 : age < 145 ? .22 : Math.max(0, 1 - (age - 145) / 275) * .13;
+    if (age < 155) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.strokeStyle = `rgba(225,242,255,${.5 * flash})`;
+      ctx.shadowColor = '#bfe5ff';
+      ctx.shadowBlur = 18;
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      lightning.points.forEach((point, index) => {
+        if (index === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.fillStyle = `rgba(202,226,244,${.085 * flash})`;
+    ctx.fillRect(0, 0, width, height * .68);
+  }
+
+  function paintNoise(now) {
+    if (now - lastNoisePaint < 120) return;
+    lastNoisePaint = now;
+    const imageData = noiseCtx.createImageData(noiseCanvas.width, noiseCanvas.height);
+    for (let index = 0; index < imageData.data.length; index += 4) {
+      const value = Math.random() * 255;
+      imageData.data[index] = value;
+      imageData.data[index + 1] = value;
+      imageData.data[index + 2] = value;
+      imageData.data[index + 3] = Math.random() * 25;
+    }
+    noiseCtx.putImageData(imageData, 0, 0);
+  }
+
+  function drawGrade(now) {
+    const leftShade = ctx.createLinearGradient(0, 0, width, 0);
+    leftShade.addColorStop(0, 'rgba(1,7,12,.62)');
+    leftShade.addColorStop(.42, 'rgba(2,8,13,.24)');
+    leftShade.addColorStop(.72, 'rgba(2,8,13,.05)');
+    leftShade.addColorStop(1, 'rgba(1,5,9,.22)');
+    ctx.fillStyle = leftShade;
+    ctx.fillRect(0, 0, width, height);
+
+    const topShade = ctx.createLinearGradient(0, 0, 0, height);
+    topShade.addColorStop(0, 'rgba(0,3,7,.38)');
+    topShade.addColorStop(.18, 'rgba(0,3,7,.05)');
+    topShade.addColorStop(.7, 'rgba(0,3,7,0)');
+    topShade.addColorStop(1, 'rgba(0,2,5,.46)');
+    ctx.fillStyle = topShade;
+    ctx.fillRect(0, 0, width, height);
+
+    const vignette = ctx.createRadialGradient(width * .51, height * .45, width * .12, width * .51, height * .45, width * .74);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(.72, 'rgba(0,0,0,.08)');
+    vignette.addColorStop(1, 'rgba(0,0,0,.62)');
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, width, height);
+
+    paintNoise(now);
+    ctx.save();
+    ctx.globalAlpha = .055;
+    ctx.globalCompositeOperation = 'soft-light';
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(noiseCanvas, 0, 0, width, height);
+    ctx.restore();
+    ctx.imageSmoothingEnabled = true;
   }
 
   function draw(now) {
     if (!running) return;
-    const dt = Math.min(48, now - last);
+    const dtMilliseconds = Math.min(48, Math.max(0, now - last));
+    const dt = dtMilliseconds / 1000;
     last = now;
-    progress += (targetProgress - progress) * Math.min(1, dt * .0065);
-    const horizon = height * (.47 + (pointerY - .5) * .018);
-    drawSky(now, horizon);
-    drawOcean(now, horizon);
-    const edges = drawCarrier(horizon, now);
-    drawJet(edges, now);
+    progress += (targetProgress - progress) * Math.min(1, dtMilliseconds * .0062);
+    pointerX += (targetPointerX - pointerX) * Math.min(1, dtMilliseconds * .0035);
+    pointerY += (targetPointerY - pointerY) * Math.min(1, dtMilliseconds * .0035);
 
-    if (progress > .68) {
-      const alpha = clamp((progress - .68) / .22, 0, 1) * .18;
-      const glow = ctx.createRadialGradient(width * .68, height * .2, 0, width * .68, height * .2, width * .35);
-      glow.addColorStop(0, `rgba(255,176,97,${alpha})`);
-      glow.addColorStop(1, 'rgba(255,176,97,0)');
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, width, height);
-    }
+    drawFallback();
+    const airborneMix = smoothRange(.6, .81, progress);
+    const launchEnergy = Math.sin(clamp((progress - .5) / .34, 0, 1) * Math.PI);
+    const cameraShake = launchEnergy * (1 - airborneMix) * 2.2;
+    const shakeX = Math.sin(now * .061) * cameraShake;
+    const shakeY = Math.cos(now * .053) * cameraShake * .55;
+    const panX = (pointerX - .5) * -18 + shakeX;
+    const panY = (pointerY - .5) * -9 - progress * 7 + shakeY;
+
+    const readyMetrics = drawCoverImage(readyImage, {
+      zoom: 1.035 + progress * .035,
+      panX,
+      panY,
+      alpha: 1,
+      filter: launchEnergy > .08 ? `blur(${launchEnergy * .45}px)` : 'none'
+    });
+
+    const airborneMetrics = drawCoverImage(airborneImage, {
+      zoom: 1.06 - airborneMix * .018,
+      panX: panX * .72,
+      panY: panY * .45 + (1 - airborneMix) * 5,
+      alpha: airborneMix,
+      filter: 'none'
+    });
+
+    drawEngineGlow(readyMetrics, false, (1 - airborneMix) * smoothRange(.38, .67, progress), now);
+    drawEngineGlow(airborneMetrics, true, airborneMix, now);
+    drawLaunchFlash(launchEnergy, now);
+    drawDeckLightPulse(now, 1 - airborneMix * .45);
+    drawSeaMist(now, launchEnergy);
+    drawRain(dt);
+    drawLensDrops(now);
+    drawLightning(now);
+    drawGrade(now);
     frameId = requestAnimationFrame(draw);
   }
 
   function onPointerMove(event) {
-    pointerX = event.clientX / Math.max(1, width);
-    pointerY = event.clientY / Math.max(1, height);
+    targetPointerX = event.clientX / Math.max(1, width);
+    targetPointerY = event.clientY / Math.max(1, height);
+  }
+
+  function onVisibilityChange() {
+    if (!document.hidden) last = performance.now();
   }
 
   window.addEventListener('resize', fit, { passive: true });
   window.addEventListener('scroll', updateScroll, { passive: true });
   window.addEventListener('pointermove', onPointerMove, { passive: true });
+  document.addEventListener('visibilitychange', onVisibilityChange);
 
   window.__carrierBackground = {
     destroy() {
@@ -329,6 +440,8 @@
       window.removeEventListener('resize', fit);
       window.removeEventListener('scroll', updateScroll);
       window.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      document.body.classList.remove('carrier-cinematic', 'carrier-imagery-ready');
       canvas.remove();
       hud.remove();
       if (window.__carrierBackground === this) delete window.__carrierBackground;
@@ -338,4 +451,3 @@
   fit();
   frameId = requestAnimationFrame(draw);
 })();
-

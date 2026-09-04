@@ -39,9 +39,12 @@ body.route-resume {
 }
 
 body.route-projects,
-body.route-engineering,
-body.route-resume {
+body.route-engineering {
   background: #03070d !important;
+}
+
+body.route-resume {
+  background: #03070d url("../assets/images/carrier-storm-ready-v1.webp") center center / cover fixed no-repeat !important;
 }
 
 body.route-projects .md-content,
@@ -882,6 +885,11 @@ body.site-arriving .market-console { animation-delay: 90ms; }
   contain: strict;
 }
 
+#carrier-world {
+  background: #050b11 url("../assets/images/carrier-storm-ready-v1.webp") center center / cover no-repeat;
+  will-change: contents;
+}
+
 .project-world-page {
   position: relative;
   padding-bottom: 14vh;
@@ -1209,6 +1217,7 @@ body.route-projects .md-button--primary {
 }
 
 .resume-flight-hero {
+  position: relative;
   display: grid;
   min-height: calc(100svh - 105px);
   align-content: center;
@@ -1217,10 +1226,15 @@ body.route-projects .md-button--primary {
 
 .resume-flight-hero__eyebrow {
   color: var(--experience-orange);
+  text-shadow: 0 0 18px rgba(255, 159, 67, .42);
 }
 
 .resume-flight-hero h1 em {
   -webkit-text-stroke-color: rgba(255, 185, 102, .72);
+}
+
+.md-typeset .resume-flight-hero h1 {
+  text-shadow: 0 8px 42px rgba(0, 0, 0, .88);
 }
 
 .resume-flight-hero > p:not(.resume-flight-hero__eyebrow) {
@@ -1229,6 +1243,7 @@ body.route-projects .md-button--primary {
   color: rgba(229,237,242,.66);
   font-size: clamp(.95rem, 1.5vw, 1.08rem);
   line-height: 1.72;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, .9);
 }
 
 .resume-flight-hero__actions {
@@ -1362,11 +1377,15 @@ body.route-projects .md-button--primary {
 .flight-record__card {
   position: relative;
   padding: 22px;
-  background: linear-gradient(145deg, rgba(14,21,28,.88), rgba(6,11,17,.82));
-  border: 1px solid rgba(255,183,99,.14);
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(13, 23, 31, .84), rgba(3, 9, 14, .72)),
+    linear-gradient(90deg, rgba(255, 159, 67, .025), transparent 52%);
+  border: 1px solid rgba(196, 220, 231, .14);
   border-radius: 18px;
-  box-shadow: 0 24px 70px rgba(0,0,0,.32), inset 0 1px rgba(255,255,255,.035);
-  backdrop-filter: blur(18px);
+  box-shadow: 0 28px 80px rgba(0,0,0,.48), inset 0 1px rgba(255,255,255,.06);
+  -webkit-backdrop-filter: blur(22px) saturate(1.18);
+  backdrop-filter: blur(22px) saturate(1.18);
 }
 
 .flight-record__card::before {
@@ -1455,11 +1474,12 @@ body.route-projects .md-button--primary {
   gap: 28px;
   margin-top: 6vh;
   padding: clamp(26px, 5vw, 48px);
-  background: linear-gradient(130deg, rgba(18,25,32,.92), rgba(7,11,16,.88));
-  border: 1px solid rgba(255,178,91,.14);
+  background: linear-gradient(130deg, rgba(15,25,33,.86), rgba(4,9,14,.76));
+  border: 1px solid rgba(205,224,233,.14);
   border-radius: 24px;
   box-shadow: 0 30px 80px rgba(0,0,0,.38);
-  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(22px) saturate(1.15);
+  backdrop-filter: blur(22px) saturate(1.15);
 }
 
 .md-typeset .resume-document h2 {
@@ -1482,7 +1502,11 @@ body.route-projects .md-button--primary {
   bottom: 20px;
   min-width: 210px;
   padding: 11px 13px;
-  border-color: rgba(255,159,67,.16);
+  background: linear-gradient(145deg, rgba(5,13,19,.84), rgba(3,8,12,.72));
+  border-color: rgba(255,159,67,.2);
+  box-shadow: 0 18px 60px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.05);
+  -webkit-backdrop-filter: blur(18px) saturate(1.18);
+  backdrop-filter: blur(18px) saturate(1.18);
 }
 
 .carrier-hud__top i {
@@ -1493,6 +1517,17 @@ body.route-projects .md-button--primary {
 .carrier-hud__meter span {
   background: linear-gradient(90deg, var(--experience-orange), #fff1c5);
   box-shadow: 0 0 8px var(--experience-orange);
+}
+
+.carrier-hud__telemetry {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 8px 0 7px;
+  color: rgba(222, 237, 244, .52);
+  font-family: var(--experience-mono);
+  font-size: 7px;
+  letter-spacing: .1em;
 }
 
 /* ========================================================================== 
