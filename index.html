@@ -2,11 +2,20 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    
+
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
-      
+
         <meta name="description" content="Discover my portfolio, current projects, Achievements, Career Progression, Interests">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="James Singhi — Engineer × Analyst">
+        <meta property="og:description" content="Interactive software engineering, finance and product portfolio by James Singhi.">
+        <meta property="og:url" content="https://jamessinghi.github.io/">
+        <meta property="og:image" content="https://jamessinghi.github.io/assets/images/og-portfolio.png">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="James Singhi — Engineer × Analyst">
+        <meta name="twitter:description" content="Interactive software engineering, finance and product portfolio by James Singhi.">
+        <meta name="twitter:image" content="https://jamessinghi.github.io/assets/images/og-portfolio.png">
       
       
         <meta name="author" content="James Singhi">
@@ -54,6 +63,8 @@
     
       <link rel="stylesheet" href="stylesheets/quant-card.css">
     
+      <link rel="stylesheet" href="stylesheets/experience.css">
+
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -453,10 +464,57 @@
   
 
 
-<h1 id="welcome-to-my-portfolio">Welcome to My Portfolio<a class="headerlink" href="#welcome-to-my-portfolio" title="Permanent link">&para;</a></h1>
-<p>Hi, I'm James Singhi — a developing <strong>Software Engineer and Financial Analyst</strong>. 
-This website aims to showcase my programming skills as well as my career portfolio, 
-including projects across engineering and finance. Explore my work, projects, and professional journey.</p>
+<section class="home-hero" aria-labelledby="welcome-to-my-portfolio">
+  <div class="home-hero__signal" aria-label="Portfolio system online">
+    <span class="signal-dot"></span>
+    <span>PORTFOLIO SYSTEM ONLINE</span>
+    <span class="signal-code">SYD / 33.8688 S</span>
+  </div>
+
+  <div class="home-hero__grid">
+    <div class="home-hero__copy">
+      <p class="home-hero__eyebrow">SOFTWARE ENGINEERING <span>×</span> FINANCE</p>
+      <h1 id="welcome-to-my-portfolio">Building systems for<br><em>markets &amp; people.</em></h1>
+      <p class="home-hero__lead">
+        I’m James Singhi — an engineer and financial analyst turning complex data,
+        ambitious ideas and real-world constraints into useful digital products.
+      </p>
+      <div class="home-hero__actions">
+        <a class="experience-button experience-button--primary" href="projects/" data-shell-nav>Enter project world <span aria-hidden="true">↗</span></a>
+        <a class="experience-button experience-button--ghost" href="resume/" data-shell-nav>View flight record</a>
+      </div>
+    </div>
+
+    <aside class="market-console" aria-label="Portfolio focus">
+      <div class="market-console__topline">
+        <span>JS / TERMINAL 01</span>
+        <span class="market-console__live"><i></i> LIVE</span>
+      </div>
+      <div class="market-console__radar" aria-hidden="true">
+        <div class="radar-ring radar-ring--one"></div>
+        <div class="radar-ring radar-ring--two"></div>
+        <div class="radar-sweep"></div>
+        <div class="radar-node radar-node--one"></div>
+        <div class="radar-node radar-node--two"></div>
+        <span>BUILD</span>
+      </div>
+      <dl class="market-console__readout">
+        <div><dt>FOCUS</dt><dd>FINTECH / WEB</dd></div>
+        <div><dt>DEGREE</dt><dd>ENG + BUSINESS</dd></div>
+        <div><dt>SIGNAL</dt><dd>HIGH CONVICTION</dd></div>
+      </dl>
+    </aside>
+  </div>
+
+  <div class="home-proof" aria-label="Current profile highlights">
+    <div><strong>81.4</strong><span>UTS WAM</span></div>
+    <div><strong>6.30</strong><span>GPA</span></div>
+    <div><strong>02</strong><span>DISCIPLINES</span></div>
+    <div><strong>∞</strong><span>BUILD CURIOSITY</span></div>
+  </div>
+
+  <div class="home-scroll-cue" aria-hidden="true"><span></span> LIVE QUOTES MOVE BEHIND THIS INTERFACE</div>
+</section>
 
 
 
@@ -546,6 +604,8 @@ including projects across engineering and finance. Explore my work, projects, an
       
         <script src="javascripts/header-skin.js"></script>
       
+        <script src="javascripts/experience.js"></script>
+
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       
         <script src="javascripts/trading-dashboard.js"></script>

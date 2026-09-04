@@ -1,0 +1,1604 @@
+/* ========================================================================== 
+   JAMES SINGHI / PORTFOLIO EXPERIENCE LAYER
+   A cinematic interaction layer built on top of the existing MkDocs shell.
+   ========================================================================== */
+
+:root {
+  --experience-ink: #eefbf5;
+  --experience-muted: rgba(222, 241, 231, 0.66);
+  --experience-green: #65ffb4;
+  --experience-green-deep: #0fbc77;
+  --experience-cyan: #6ee7ff;
+  --experience-orange: #ff9f43;
+  --experience-panel: rgba(5, 16, 12, 0.82);
+  --experience-line: rgba(169, 255, 215, 0.17);
+  --experience-radius: 22px;
+  --experience-mono: "Roboto Mono", "SFMono-Regular", Consolas, monospace;
+  --experience-display: Inter, "Arial Narrow", "Helvetica Neue", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+}
+
+body.route-home,
+body.route-projects,
+body.route-engineering,
+body.route-resume {
+  color: var(--experience-ink);
+}
+
+body.route-projects,
+body.route-engineering,
+body.route-resume {
+  background: #03070d !important;
+}
+
+body.route-projects .md-content,
+body.route-engineering .md-content,
+body.route-resume .md-content {
+  max-width: 1060px;
+}
+
+body.route-projects .md-main__inner,
+body.route-engineering .md-main__inner,
+body.route-resume .md-main__inner {
+  padding-top: 0;
+}
+
+::selection {
+  color: #03120b;
+  background: var(--experience-green);
+}
+
+.experience-button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 18px;
+  color: #eafff4 !important;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  font-family: var(--experience-mono);
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.experience-button:hover,
+.experience-button:focus-visible {
+  color: #fff !important;
+  border-color: rgba(101, 255, 180, 0.6);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.experience-button--primary {
+  color: #03160d !important;
+  background: linear-gradient(135deg, #9dffd0, #45e99a);
+  border-color: transparent;
+  box-shadow: 0 12px 30px rgba(45, 229, 143, 0.18);
+}
+
+.experience-button--primary:hover,
+.experience-button--primary:focus-visible {
+  color: #03160d !important;
+  box-shadow: 0 18px 38px rgba(45, 229, 143, 0.29);
+}
+
+.experience-button--ghost {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+/* --- The persistent navigation becomes part of the world ---------------- */
+
+body.route-home .md-header__title,
+body.route-projects .md-header__title,
+body.route-engineering .md-header__title,
+body.route-resume .md-header__title {
+  font-family: var(--experience-mono);
+  letter-spacing: 0.03em;
+}
+
+body.route-home .md-tabs__link,
+body.route-projects .md-tabs__link,
+body.route-engineering .md-tabs__link,
+body.route-resume .md-tabs__link {
+  position: relative;
+  font-family: var(--experience-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+body.route-home .md-tabs__link::after,
+body.route-projects .md-tabs__link::after,
+body.route-engineering .md-tabs__link::after,
+body.route-resume .md-tabs__link::after {
+  content: "";
+  position: absolute;
+  right: 0.8rem;
+  bottom: 0.34rem;
+  left: 0.8rem;
+  height: 1px;
+  background: var(--experience-green);
+  transform: scaleX(0);
+  transition: transform 180ms ease;
+}
+
+body.route-home .md-tabs__link:hover::after,
+body.route-projects .md-tabs__link:hover::after,
+body.route-engineering .md-tabs__link:hover::after,
+body.route-resume .md-tabs__link:hover::after,
+body.route-home .md-tabs__item--active .md-tabs__link::after,
+body.route-projects .md-tabs__item--active .md-tabs__link::after,
+body.route-engineering .md-tabs__item--active .md-tabs__link::after,
+body.route-resume .md-tabs__item--active .md-tabs__link::after {
+  transform: scaleX(1);
+}
+
+/* ========================================================================== 
+   POWER-ON INTRO
+   ========================================================================== */
+
+body.boot-locked {
+  overflow: hidden !important;
+}
+
+.boot-experience {
+  position: fixed;
+  inset: 0;
+  z-index: 50000;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  color: #dfffee;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(21, 62, 42, 0.24), transparent 34%),
+    linear-gradient(180deg, #080b0d 0%, #020303 72%, #000 100%);
+  isolation: isolate;
+  transition: opacity 500ms ease 700ms, visibility 0s linear 1.2s;
+}
+
+.boot-experience::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.32;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
+}
+
+.boot-experience.is-complete {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-skip {
+  position: absolute;
+  top: clamp(16px, 3vw, 30px);
+  right: clamp(16px, 3vw, 34px);
+  z-index: 8;
+  padding: 9px 12px;
+  color: rgba(222, 255, 238, 0.52);
+  background: transparent;
+  border: 0;
+  font-family: var(--experience-mono);
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  cursor: pointer;
+}
+
+.boot-skip:hover,
+.boot-skip:focus-visible {
+  color: #fff;
+  outline: 1px solid rgba(101,255,180,.4);
+  outline-offset: 3px;
+}
+
+.boot-room {
+  position: relative;
+  width: min(940px, 92vw);
+  height: min(650px, 83vh);
+  perspective: 1500px;
+  transform-style: preserve-3d;
+}
+
+.boot-room__label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: rgba(194, 233, 212, 0.42);
+  font-family: var(--experience-mono);
+  font-size: 9px;
+  letter-spacing: 0.17em;
+}
+
+.boot-room__label::before {
+  content: "";
+  width: 30px;
+  height: 1px;
+  background: rgba(101, 255, 180, 0.45);
+}
+
+.desktop-rig {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  width: min(760px, 88vw);
+  height: 84%;
+  transform: translateX(-50%) rotateX(1deg);
+  transform-style: preserve-3d;
+  transition: transform 1.25s cubic-bezier(.72,.01,.2,1), opacity 350ms ease 850ms;
+}
+
+.monitor {
+  position: absolute;
+  top: 3%;
+  left: 50%;
+  width: min(620px, 76vw);
+  aspect-ratio: 16 / 10;
+  padding: 18px 18px 43px;
+  background: linear-gradient(145deg, #23282a 0%, #0e1112 46%, #262b2b 100%);
+  border: 1px solid #343b3a;
+  border-radius: 19px;
+  box-shadow:
+    0 42px 90px rgba(0,0,0,.7),
+    inset 0 1px 1px rgba(255,255,255,.1),
+    inset 0 -1px 1px rgba(0,0,0,.9);
+  transform: translateX(-50%);
+  transform-origin: 50% 42%;
+  transition: transform 1.25s cubic-bezier(.72,.01,.2,1), filter 450ms ease;
+}
+
+.monitor::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: #060707;
+  border: 1px solid #313838;
+  border-radius: 50%;
+}
+
+.monitor-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(24, 61, 42, 0.14), transparent 48%),
+    #010302;
+  border: 1px solid rgba(149, 185, 165, 0.13);
+  border-radius: 8px;
+  box-shadow: inset 0 0 50px #000;
+  transition: box-shadow 350ms ease, background 350ms ease;
+}
+
+.monitor-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.2;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(170,255,211,.035) 3px 4px);
+  mix-blend-mode: screen;
+}
+
+.monitor-screen__off {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(132, 170, 149, 0.18);
+  font-family: var(--experience-mono);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  transition: opacity 200ms ease;
+}
+
+.monitor-screen__ui {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: clamp(18px, 4vw, 34px);
+  opacity: 0;
+  filter: blur(7px);
+  transform: scale(.985);
+  transition: opacity 400ms ease 180ms, filter 450ms ease 160ms, transform 450ms ease 160ms;
+}
+
+.boot-experience.is-booting .monitor-screen {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(29, 132, 83, 0.16), transparent 50%),
+    #010704;
+  box-shadow: inset 0 0 50px #000, 0 0 36px rgba(45, 255, 143, 0.09);
+}
+
+.boot-experience.is-booting .monitor-screen__off {
+  opacity: 0;
+}
+
+.boot-experience.is-booting .monitor-screen__ui {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+}
+
+.boot-ui__header,
+.boot-ui__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: rgba(170, 229, 197, 0.52);
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .14em;
+}
+
+.boot-ui__header i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  background: var(--experience-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--experience-green);
+}
+
+.boot-ui__main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.boot-ui__kicker {
+  margin: 0 0 8px;
+  color: var(--experience-green);
+  font-family: var(--experience-mono);
+  font-size: clamp(8px, 1vw, 11px);
+  letter-spacing: .22em;
+}
+
+.boot-ui__main strong {
+  color: #effff6;
+  font-family: var(--experience-display);
+  font-size: clamp(30px, 6.4vw, 66px);
+  font-weight: 800;
+  letter-spacing: -.065em;
+  line-height: .92;
+}
+
+.boot-ui__main strong span {
+  display: block;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(168, 255, 211, .62);
+}
+
+.boot-terminal {
+  min-height: 55px;
+  margin-top: clamp(16px, 3vw, 30px);
+  color: rgba(196, 255, 223, 0.52);
+  font-family: var(--experience-mono);
+  font-size: clamp(7px, 1vw, 9px);
+  line-height: 1.7;
+}
+
+.boot-terminal span {
+  display: block;
+}
+
+.monitor-brand {
+  position: absolute;
+  bottom: 14px;
+  left: 19px;
+  color: rgba(235, 255, 244, 0.22);
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .16em;
+}
+
+.monitor-power {
+  position: absolute;
+  right: 17px;
+  bottom: 10px;
+  z-index: 6;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  background: #090b0b;
+  border: 1px solid #49504f;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: inset 0 1px 3px rgba(255,255,255,.06), 0 0 0 5px rgba(0,0,0,.12);
+}
+
+.monitor-power::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 2px;
+  height: 7px;
+  background: #8a9691;
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+.monitor-power::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 2px solid #8a9691;
+  border-top-color: transparent;
+  border-radius: 50%;
+}
+
+.monitor-power:hover,
+.monitor-power:focus-visible {
+  border-color: var(--experience-green);
+  outline: none;
+  box-shadow: 0 0 18px rgba(101,255,180,.35), 0 0 0 5px rgba(101,255,180,.06);
+}
+
+.boot-experience.is-booting .monitor-power {
+  border-color: #6fffb8;
+  box-shadow: 0 0 18px rgba(101,255,180,.5), 0 0 0 5px rgba(101,255,180,.08);
+}
+
+.boot-experience.is-booting .monitor-power::before {
+  background: var(--experience-green);
+}
+
+.boot-experience.is-booting .monitor-power::after {
+  border-right-color: var(--experience-green);
+  border-bottom-color: var(--experience-green);
+  border-left-color: var(--experience-green);
+}
+
+.monitor-stand {
+  position: absolute;
+  top: min(440px, 54vw);
+  left: 50%;
+  width: 116px;
+  height: 75px;
+  background: linear-gradient(90deg, #090b0b, #242929 50%, #090b0b);
+  clip-path: polygon(32% 0, 68% 0, 78% 78%, 100% 88%, 100% 100%, 0 100%, 0 88%, 22% 78%);
+  transform: translateX(-50%) rotateX(20deg);
+  transform-origin: top;
+}
+
+.boot-desk {
+  position: absolute;
+  right: -12vw;
+  bottom: 5%;
+  left: -12vw;
+  height: 8%;
+  background: linear-gradient(180deg, #171a1a, #050606);
+  border-top: 1px solid #313636;
+  box-shadow: 0 22px 60px #000;
+  transform: rotateX(67deg);
+}
+
+.boot-keyboard {
+  position: absolute;
+  bottom: 1%;
+  left: 50%;
+  width: 39%;
+  height: 7%;
+  opacity: .75;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 13px, rgba(255,255,255,.07) 13px 14px),
+    repeating-linear-gradient(0deg, #161a19 0 7px, #080a09 7px 9px);
+  border: 1px solid #2b312f;
+  border-radius: 6px;
+  transform: translateX(-50%) rotateX(62deg);
+  box-shadow: 0 14px 30px #000;
+}
+
+.boot-instruction {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: rgba(220, 245, 231, 0.58);
+  font-family: var(--experience-mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-align: center;
+  transform: translateX(-50%);
+  transition: opacity 200ms ease;
+}
+
+.boot-instruction i {
+  width: 5px;
+  height: 5px;
+  background: var(--experience-green);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--experience-green);
+  animation: boot-blink 1.2s steps(2) infinite;
+}
+
+.boot-experience.is-booting .boot-instruction {
+  opacity: 0;
+}
+
+.boot-experience.is-zooming .monitor {
+  filter: saturate(1.3) brightness(1.08);
+  transform: translateX(-50%) scale(7.5);
+}
+
+.boot-experience.is-zooming .desktop-rig {
+  transform: translateX(-50%) translateY(1.5vh);
+}
+
+@keyframes boot-blink { 50% { opacity: .2; } }
+
+/* ========================================================================== 
+   HOME / MARKET COMMAND CENTRE
+   ========================================================================== */
+
+.home-hero {
+  position: relative;
+  display: flex;
+  min-height: calc(100svh - 128px);
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(48px, 8vh, 90px) 0 38px;
+}
+
+.home-hero__signal {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 7px 10px;
+  color: rgba(217, 246, 229, 0.58);
+  background: rgba(1, 10, 6, 0.65);
+  border: 1px solid rgba(143, 255, 194, 0.13);
+  border-radius: 999px;
+  font-family: var(--experience-mono);
+  font-size: 9px;
+  letter-spacing: .11em;
+  backdrop-filter: blur(12px);
+}
+
+.signal-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--experience-green);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--experience-green);
+}
+
+.signal-code {
+  padding-left: 10px;
+  color: rgba(217, 246, 229, 0.32);
+  border-left: 1px solid rgba(255,255,255,.12);
+}
+
+.home-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.42fr) minmax(250px, .58fr);
+  gap: clamp(26px, 6vw, 72px);
+  align-items: center;
+}
+
+.home-hero__copy {
+  position: relative;
+  padding: clamp(24px, 4vw, 42px);
+  background: linear-gradient(145deg, rgba(4, 17, 10, .9), rgba(5, 18, 12, .72));
+  border: 1px solid rgba(152, 255, 201, 0.13);
+  border-radius: 28px;
+  box-shadow: 0 32px 80px rgba(0,0,0,.3);
+  backdrop-filter: blur(18px);
+}
+
+.home-hero__copy::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 28px;
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--experience-green), transparent);
+  box-shadow: 0 0 16px var(--experience-green);
+}
+
+.home-hero__eyebrow,
+.project-world-hero__eyebrow,
+.resume-flight-hero__eyebrow {
+  margin: 0 0 15px !important;
+  color: var(--experience-green);
+  font-family: var(--experience-mono);
+  font-size: clamp(9px, 1.2vw, 11px);
+  font-weight: 700;
+  letter-spacing: .2em;
+}
+
+.home-hero__eyebrow span {
+  margin: 0 7px;
+  color: rgba(255,255,255,.35);
+}
+
+.md-typeset .home-hero h1 {
+  margin: 0;
+  color: #f1fff7 !important;
+  font-family: var(--experience-display);
+  font-size: clamp(2.65rem, 6.5vw, 5rem);
+  font-weight: 850;
+  letter-spacing: -.07em;
+  line-height: .91;
+  text-align: left;
+}
+
+.home-hero h1 em,
+.project-world-hero h1 em,
+.resume-flight-hero h1 em {
+  color: transparent;
+  font-style: normal;
+  -webkit-text-stroke: 1px rgba(189, 255, 220, .62);
+}
+
+.home-hero__lead {
+  max-width: 600px;
+  margin: 22px 0 0 !important;
+  color: rgba(230, 246, 237, .7);
+  font-size: clamp(.95rem, 1.65vw, 1.13rem);
+  line-height: 1.65;
+}
+
+.home-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.market-console {
+  position: relative;
+  min-height: 390px;
+  padding: 18px;
+  background:
+    linear-gradient(145deg, rgba(12, 32, 22, .88), rgba(2, 10, 6, .9)),
+    repeating-linear-gradient(90deg, transparent 0 25px, rgba(101,255,180,.02) 25px 26px);
+  border: 1px solid rgba(156, 255, 204, .16);
+  border-radius: 24px;
+  box-shadow: 0 30px 70px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.05);
+  backdrop-filter: blur(20px);
+  transform: perspective(800px) rotateY(-4deg) rotateX(1deg);
+  transform-style: preserve-3d;
+}
+
+.market-console::after {
+  content: "";
+  position: absolute;
+  right: 13px;
+  bottom: 13px;
+  width: 5px;
+  height: 5px;
+  background: var(--experience-orange);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--experience-orange);
+}
+
+.market-console__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: rgba(225, 246, 235, .42);
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .12em;
+}
+
+.market-console__live {
+  color: rgba(210,255,230,.7);
+}
+
+.market-console__live i {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 5px;
+  background: var(--experience-green);
+  border-radius: 50%;
+  box-shadow: 0 0 9px var(--experience-green);
+}
+
+.market-console__radar {
+  position: relative;
+  width: min(210px, 85%);
+  aspect-ratio: 1;
+  margin: 30px auto 24px;
+  overflow: hidden;
+  background: radial-gradient(circle, rgba(101,255,180,.045) 0 1px, transparent 1px 100%);
+  border: 1px solid rgba(101,255,180,.14);
+  border-radius: 50%;
+  box-shadow: inset 0 0 35px rgba(58, 255, 150, .035);
+}
+
+.market-console__radar::before,
+.market-console__radar::after {
+  content: "";
+  position: absolute;
+  background: rgba(101,255,180,.08);
+}
+
+.market-console__radar::before { top: 50%; right: 10%; left: 10%; height: 1px; }
+.market-console__radar::after { top: 10%; bottom: 10%; left: 50%; width: 1px; }
+
+.market-console__radar > span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  color: rgba(205,255,227,.65);
+  font-family: var(--experience-mono);
+  font-size: 9px;
+  letter-spacing: .18em;
+  transform: translate(-50%, -50%);
+}
+
+.radar-ring {
+  position: absolute;
+  border: 1px solid rgba(101,255,180,.1);
+  border-radius: 50%;
+}
+
+.radar-ring--one { inset: 21%; }
+.radar-ring--two { inset: 38%; }
+
+.radar-sweep {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from 0deg, transparent 0 72%, rgba(101,255,180,.2) 94%, rgba(101,255,180,.48) 100%);
+  border-radius: 50%;
+  animation: radar-spin 5s linear infinite;
+}
+
+.radar-node {
+  position: absolute;
+  z-index: 2;
+  width: 6px;
+  height: 6px;
+  background: var(--experience-green);
+  border-radius: 50%;
+  box-shadow: 0 0 14px var(--experience-green);
+  animation: node-pulse 1.8s ease-in-out infinite;
+}
+
+.radar-node--one { top: 27%; left: 61%; }
+.radar-node--two { right: 22%; bottom: 27%; animation-delay: -.8s; }
+
+.market-console__readout {
+  margin: 0;
+}
+
+.market-console__readout > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255,255,255,.055);
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .08em;
+}
+
+.market-console__readout dt { color: rgba(225,245,234,.34); }
+.market-console__readout dd { margin: 0; color: rgba(228,255,240,.78); }
+
+.home-proof {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  margin-top: 18px;
+  overflow: hidden;
+  background: rgba(116, 255, 182, .09);
+  border: 1px solid rgba(154, 255, 203, .1);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+}
+
+.home-proof > div {
+  display: flex;
+  min-height: 78px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 13px 18px;
+  background: rgba(2, 12, 7, .78);
+}
+
+.home-proof strong {
+  color: #effff6;
+  font-family: var(--experience-display);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.home-proof span {
+  margin-top: 6px;
+  color: rgba(214,242,226,.43);
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .12em;
+}
+
+.home-scroll-cue {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 18px 0 0 4px;
+  color: rgba(211,240,224,.28);
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .13em;
+}
+
+.home-scroll-cue span {
+  width: 24px;
+  height: 1px;
+  overflow: hidden;
+  background: rgba(101,255,180,.15);
+}
+
+body.site-arriving .home-hero__copy,
+body.site-arriving .market-console,
+body.site-arriving .home-proof,
+body.site-arriving .home-hero__signal {
+  animation: home-arrive 900ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+body.site-arriving .market-console { animation-delay: 90ms; }
+body.site-arriving .home-proof { animation-delay: 160ms; }
+
+@keyframes radar-spin { to { transform: rotate(360deg); } }
+@keyframes node-pulse { 50% { opacity: .35; transform: scale(.72); } }
+@keyframes home-arrive { from { opacity: 0; transform: translateY(24px) scale(.985); filter: blur(8px); } }
+
+/* ========================================================================== 
+   PROJECT ORBITAL WORLD
+   ========================================================================== */
+
+#orbital-world,
+#carrier-world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  contain: strict;
+}
+
+.project-world-page {
+  position: relative;
+  padding-bottom: 14vh;
+}
+
+.project-world-hero {
+  display: grid;
+  min-height: calc(100svh - 106px);
+  align-content: center;
+  padding: clamp(60px, 10vh, 120px) clamp(18px, 5vw, 60px);
+}
+
+.md-typeset .project-world-hero h1,
+.md-typeset .resume-flight-hero h1 {
+  max-width: 760px;
+  margin: 0;
+  color: #f4fbff !important;
+  font-family: var(--experience-display);
+  font-size: clamp(3rem, 8.5vw, 6.8rem);
+  font-weight: 850;
+  letter-spacing: -.075em;
+  line-height: .88;
+  text-align: left;
+}
+
+.project-world-hero > p:not(.project-world-hero__eyebrow) {
+  max-width: 640px;
+  margin: 27px 0 0;
+  color: rgba(226,239,248,.64);
+  font-size: clamp(.95rem, 1.5vw, 1.08rem);
+  line-height: 1.72;
+}
+
+.project-world-hero__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 11px;
+  margin-top: 30px;
+}
+
+.project-world-hero__legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  color: rgba(222,238,248,.48);
+  background: rgba(7,15,24,.62);
+  border: 1px solid rgba(127,221,255,.12);
+  border-radius: 999px;
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.project-world-hero__legend kbd {
+  min-width: 22px;
+  padding: 2px 5px;
+  color: #c8f7ff;
+  background: rgba(110,231,255,.08);
+  border: 1px solid rgba(110,231,255,.2);
+  border-radius: 4px;
+  box-shadow: none;
+  font-family: inherit;
+  font-size: 8px;
+  text-align: center;
+}
+
+.project-world-hero__legend i {
+  width: 5px;
+  height: 5px;
+  background: var(--experience-cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 9px var(--experience-cyan);
+}
+
+.project-section-label {
+  margin: 0 0 1.2rem !important;
+  color: rgba(225,245,255,.42) !important;
+  font-family: var(--experience-mono);
+  font-size: .72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: .18em;
+  text-align: left !important;
+  text-transform: uppercase;
+}
+
+.project-module {
+  position: relative;
+  opacity: .56;
+  transform: translateY(28px) scale(.985);
+  transform-origin: 50% 0;
+  transition: opacity 620ms ease, transform 620ms cubic-bezier(.2,.8,.2,1), border-color 250ms ease;
+}
+
+.project-module::before {
+  content: attr(data-orbit-index);
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 5;
+  color: rgba(176,239,255,.24);
+  font-family: var(--experience-mono);
+  font-size: 9px;
+  letter-spacing: .13em;
+  pointer-events: none;
+}
+
+.project-module.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+body.route-projects .quant-card,
+body.route-projects .arch-wrap,
+body.route-projects .dash-card,
+body.route-projects .amort-card,
+body.route-projects .stockviz-card,
+body.route-projects .venture-card,
+body.route-engineering .engineering-empty {
+  color: rgba(230,242,250,.88);
+  background: linear-gradient(145deg, rgba(9,18,28,.9), rgba(4,11,18,.82)) !important;
+  border: 1px solid rgba(120,215,255,.14) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.36), inset 0 1px rgba(255,255,255,.035) !important;
+  backdrop-filter: blur(18px) saturate(1.1) !important;
+}
+
+body.route-projects .quant-card,
+body.route-projects .stockviz-card,
+body.route-projects .venture-card,
+body.route-engineering .engineering-empty {
+  border-radius: 24px;
+}
+
+body.route-projects .arch-title,
+body.route-projects .arch-subtitle,
+body.route-projects .arch-caption,
+body.route-projects .dash-title,
+body.route-projects .dash-subtitle,
+body.route-projects .md-typeset h2,
+body.route-projects .md-typeset h3 {
+  color: rgba(237,248,255,.9) !important;
+}
+
+body.route-projects .arch-title,
+body.route-projects .dash-title {
+  font-family: var(--experience-display);
+  letter-spacing: -.025em;
+}
+
+body.route-projects .arch-box {
+  color: rgba(223,239,249,.76);
+  background: rgba(112, 214, 255, .045);
+  border: 1px solid rgba(123,218,255,.12);
+  box-shadow: none;
+}
+
+body.route-projects .arch-box__title,
+body.route-projects .arch-list,
+body.route-projects .arch-caption,
+body.route-projects .arch-subtitle {
+  color: rgba(226,242,252,.68);
+}
+
+body.route-projects .metric,
+body.route-projects .dash-select {
+  color: rgba(235,249,255,.88);
+  background: rgba(102,214,255,.075);
+  border-color: rgba(119,222,255,.15);
+}
+
+body.route-projects #tradeTable th,
+body.route-projects #tradeTable td,
+body.route-projects .amort-table th,
+body.route-projects .amort-table td {
+  color: rgba(227,241,250,.82);
+  background: rgba(5,12,19,.72);
+  border-color: rgba(109,211,255,.09);
+}
+
+body.route-projects .amort-card input,
+body.route-projects .amort-card select {
+  color: #eaf8ff;
+  background: rgba(255,255,255,.06);
+  border-color: rgba(120,220,255,.16);
+}
+
+body.route-projects .md-button {
+  color: #dff8ff;
+  border-color: rgba(110,231,255,.24);
+}
+
+body.route-projects .md-button--primary {
+  color: #031116;
+  background: var(--experience-cyan);
+  border-color: transparent;
+}
+
+.orbit-hud,
+.carrier-hud {
+  position: fixed;
+  z-index: 8;
+  color: rgba(221,245,255,.68);
+  background: rgba(3, 9, 16, .68);
+  border: 1px solid rgba(110,231,255,.14);
+  border-radius: 13px;
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .1em;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+}
+
+.orbit-hud {
+  right: 20px;
+  bottom: 20px;
+  min-width: 172px;
+  padding: 11px 13px;
+}
+
+.orbit-hud__top,
+.carrier-hud__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.orbit-hud__top i,
+.carrier-hud__top i {
+  width: 5px;
+  height: 5px;
+  background: var(--experience-cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--experience-cyan);
+}
+
+.orbit-hud__meter,
+.carrier-hud__meter {
+  height: 2px;
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+}
+
+.orbit-hud__meter span,
+.carrier-hud__meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--experience-cyan), #af7dff);
+  box-shadow: 0 0 8px var(--experience-cyan);
+}
+
+.orbit-controls {
+  position: fixed;
+  bottom: 18px;
+  left: 18px;
+  z-index: 12;
+  display: none;
+  gap: 7px;
+}
+
+.orbit-controls button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  place-items: center;
+  color: rgba(227,248,255,.76);
+  background: rgba(4,13,22,.76);
+  border: 1px solid rgba(110,231,255,.2);
+  border-radius: 12px;
+  font-family: var(--experience-mono);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+}
+
+.engineering-world-page .engineering-empty {
+  margin-top: 2rem;
+  padding: clamp(42px, 9vw, 86px) clamp(22px, 5vw, 62px);
+  text-align: left;
+}
+
+.engineering-world-page .engineering-empty h2 {
+  max-width: 620px;
+  margin: 0;
+  color: #f1faff !important;
+  font-family: var(--experience-display);
+  font-size: clamp(1.9rem, 5vw, 3.7rem);
+  letter-spacing: -.05em;
+  text-align: left;
+}
+
+.engineering-world-page .engineering-empty > p {
+  max-width: 620px;
+  color: rgba(222,239,249,.6);
+}
+
+.engineering-bays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 30px;
+}
+
+.engineering-bays span {
+  padding: 8px 10px;
+  color: rgba(202,244,255,.62);
+  background: rgba(110,231,255,.05);
+  border: 1px solid rgba(110,231,255,.12);
+  border-radius: 999px;
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .1em;
+}
+
+/* ========================================================================== 
+   RESUME / CARRIER FLIGHT DECK
+   ========================================================================== */
+
+.resume-flight-page {
+  position: relative;
+  padding-bottom: 18vh;
+}
+
+.resume-flight-hero {
+  display: grid;
+  min-height: calc(100svh - 105px);
+  align-content: center;
+  padding: clamp(60px, 11vh, 120px) clamp(18px, 5vw, 64px);
+}
+
+.resume-flight-hero__eyebrow {
+  color: var(--experience-orange);
+}
+
+.resume-flight-hero h1 em {
+  -webkit-text-stroke-color: rgba(255, 185, 102, .72);
+}
+
+.resume-flight-hero > p:not(.resume-flight-hero__eyebrow) {
+  max-width: 620px;
+  margin: 27px 0 0;
+  color: rgba(229,237,242,.66);
+  font-size: clamp(.95rem, 1.5vw, 1.08rem);
+  line-height: 1.72;
+}
+
+.resume-flight-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.resume-flight-hero .experience-button--primary,
+.resume-document .experience-button--primary {
+  color: #1d0b00 !important;
+  background: linear-gradient(135deg, #ffc76f, #ff8f38);
+  box-shadow: 0 12px 30px rgba(255,139,56,.2);
+}
+
+.resume-flight-hero__instruction {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(235,242,247,.42);
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .13em;
+}
+
+.resume-flight-hero__instruction i {
+  width: 5px;
+  height: 5px;
+  background: var(--experience-orange);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--experience-orange);
+  animation: node-pulse 1.7s ease-in-out infinite;
+}
+
+.flight-record {
+  position: relative;
+  display: grid;
+  gap: 15vh;
+  padding: 12vh 0 16vh;
+}
+
+.flight-record__rail {
+  position: absolute;
+  top: 8vh;
+  bottom: 10vh;
+  left: 50%;
+  width: 1px;
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+}
+
+.flight-record__rail span {
+  display: block;
+  width: 100%;
+  height: var(--flight-progress, 0%);
+  background: linear-gradient(180deg, var(--experience-orange), #78e8ff);
+  box-shadow: 0 0 12px rgba(255,159,67,.5);
+}
+
+.flight-record__entry {
+  position: relative;
+  display: grid;
+  width: 50%;
+  grid-template-columns: minmax(80px, 132px) 1fr;
+  gap: 18px;
+  align-items: start;
+  padding-right: 38px;
+  opacity: .4;
+  transform: translateX(-25px);
+  transition: opacity 600ms ease, transform 650ms cubic-bezier(.2,.8,.2,1);
+}
+
+.flight-record__entry::after {
+  content: attr(data-flight-code);
+  position: absolute;
+  top: 19px;
+  right: -13px;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  color: #251000;
+  background: var(--experience-orange);
+  border: 4px solid #0b1117;
+  border-radius: 50%;
+  font-family: var(--experience-mono);
+  font-size: 7px;
+  font-weight: 800;
+  box-shadow: 0 0 18px rgba(255,145,59,.23);
+}
+
+.flight-record__entry--right {
+  margin-left: 50%;
+  grid-template-columns: 1fr minmax(80px, 132px);
+  padding-right: 0;
+  padding-left: 38px;
+  transform: translateX(25px);
+}
+
+.flight-record__entry--right .flight-record__date {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.flight-record__entry--right .flight-record__card {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.flight-record__entry--right::after {
+  right: auto;
+  left: -13px;
+}
+
+.flight-record__entry.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.flight-record__date {
+  padding-top: 18px;
+  color: rgba(230,239,245,.38);
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  letter-spacing: .1em;
+  line-height: 1.5;
+}
+
+.flight-record__card {
+  position: relative;
+  padding: 22px;
+  background: linear-gradient(145deg, rgba(14,21,28,.88), rgba(6,11,17,.82));
+  border: 1px solid rgba(255,183,99,.14);
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.32), inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter: blur(18px);
+}
+
+.flight-record__card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 20px;
+  width: 48px;
+  height: 1px;
+  background: var(--experience-orange);
+  box-shadow: 0 0 11px var(--experience-orange);
+}
+
+.flight-record__type,
+.resume-document__eyebrow {
+  margin: 0 0 8px !important;
+  color: rgba(255,183,99,.66);
+  font-family: var(--experience-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .13em;
+}
+
+.md-typeset .flight-record__card h2 {
+  margin: 0;
+  color: rgba(245,249,252,.94) !important;
+  font-family: var(--experience-display);
+  font-size: clamp(1.15rem, 2.5vw, 1.65rem);
+  letter-spacing: -.035em;
+  text-align: left;
+}
+
+.flight-record__card > p:not(.flight-record__type) {
+  margin: 10px 0 0;
+  color: rgba(221,231,237,.61);
+  font-size: .78rem;
+  line-height: 1.65;
+}
+
+.flight-record__metrics {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.flight-record__metrics span {
+  padding: 7px 9px;
+  color: rgba(230,238,243,.52);
+  background: rgba(255,159,67,.055);
+  border: 1px solid rgba(255,159,67,.11);
+  border-radius: 8px;
+  font-family: var(--experience-mono);
+  font-size: 8px;
+}
+
+.flight-record__metrics strong {
+  color: #ffd19b;
+  font-size: 12px;
+}
+
+.flight-record__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 15px 0 0 !important;
+  padding: 0 !important;
+  list-style: none;
+}
+
+.flight-record__tags li {
+  margin: 0 !important;
+  padding: 7px 9px;
+  color: rgba(232,239,244,.6);
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  font-family: var(--experience-mono);
+  font-size: 7px;
+  letter-spacing: .06em;
+}
+
+.resume-document {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  margin-top: 6vh;
+  padding: clamp(26px, 5vw, 48px);
+  background: linear-gradient(130deg, rgba(18,25,32,.92), rgba(7,11,16,.88));
+  border: 1px solid rgba(255,178,91,.14);
+  border-radius: 24px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.38);
+  backdrop-filter: blur(18px);
+}
+
+.md-typeset .resume-document h2 {
+  margin: 0;
+  color: rgba(247,250,252,.94) !important;
+  font-family: var(--experience-display);
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  letter-spacing: -.045em;
+  text-align: left;
+}
+
+.resume-document p:not(.resume-document__eyebrow) {
+  max-width: 620px;
+  margin-bottom: 0;
+  color: rgba(225,233,239,.58);
+}
+
+.carrier-hud {
+  right: 20px;
+  bottom: 20px;
+  min-width: 210px;
+  padding: 11px 13px;
+  border-color: rgba(255,159,67,.16);
+}
+
+.carrier-hud__top i {
+  background: var(--experience-orange);
+  box-shadow: 0 0 10px var(--experience-orange);
+}
+
+.carrier-hud__meter span {
+  background: linear-gradient(90deg, var(--experience-orange), #fff1c5);
+  box-shadow: 0 0 8px var(--experience-orange);
+}
+
+/* ========================================================================== 
+   RESPONSIVE + MOTION SAFETY
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .home-hero__grid { grid-template-columns: 1fr; }
+  .market-console { display: none; }
+  .home-hero { min-height: auto; padding-top: 54px; }
+  .home-proof { grid-template-columns: 1fr 1fr; }
+  .project-world-hero,
+  .resume-flight-hero { min-height: calc(100svh - 100px); padding-right: 10px; padding-left: 10px; }
+
+  .flight-record { gap: 9vh; }
+  .flight-record__rail { left: 14px; }
+  .flight-record__entry,
+  .flight-record__entry--right {
+    width: 100%;
+    margin-left: 0;
+    grid-template-columns: 1fr;
+    padding-right: 0;
+    padding-left: 42px;
+  }
+  .flight-record__entry .flight-record__date,
+  .flight-record__entry--right .flight-record__date {
+    grid-column: 1;
+    grid-row: 1;
+    padding-top: 0;
+  }
+  .flight-record__entry .flight-record__card,
+  .flight-record__entry--right .flight-record__card {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .flight-record__entry::after,
+  .flight-record__entry--right::after {
+    top: 0;
+    right: auto;
+    left: 1px;
+  }
+  .resume-document { align-items: flex-start; flex-direction: column; }
+}
+
+@media (max-width: 680px) {
+  .boot-room { width: 96vw; height: 76vh; }
+  .desktop-rig { width: 96vw; }
+  .monitor { width: 91vw; padding: 10px 10px 34px; border-radius: 12px; }
+  .monitor-stand,
+  .boot-keyboard { display: none; }
+  .monitor-brand { bottom: 11px; }
+  .monitor-power { right: 10px; bottom: 5px; }
+  .boot-instruction { bottom: 8%; padding: 0 20px; line-height: 1.6; }
+
+  .home-hero__copy { padding: 24px 20px; border-radius: 21px; }
+  .home-hero__actions { align-items: stretch; flex-direction: column; }
+  .experience-button { width: 100%; }
+  .home-proof > div { min-height: 66px; padding: 11px 13px; }
+  .signal-code { display: none; }
+  .project-world-hero__legend { display: none; }
+  .project-module::before { top: 11px; right: 12px; }
+  .orbit-hud,
+  .carrier-hud { right: 10px; bottom: 10px; min-width: 150px; }
+  .orbit-controls { display: flex; }
+  .resume-flight-hero__actions { align-items: stretch; flex-direction: column; }
+  .flight-record__card { padding: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .radar-sweep,
+  .radar-node,
+  .boot-instruction i,
+  body.site-arriving .home-hero__copy,
+  body.site-arriving .market-console,
+  body.site-arriving .home-proof,
+  body.site-arriving .home-hero__signal {
+    animation: none !important;
+  }
+  .project-module,
+  .flight-record__entry {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  #orbital-world,
+  #carrier-world,
+  .orbit-hud,
+  .carrier-hud,
+  .orbit-controls { display: none !important; }
+}

@@ -1,9 +1,10 @@
 /* ============================================================================
    Background Loader (page-aware)
    - Home + Contact  → loads javascripts/bg-ticker.js
-   - Projects + Resume → loads javascripts/bg-bubbles.js
+   - Projects → loads javascripts/bg-orbital.js
+   - Resume → loads javascripts/bg-carrier.js
    - Works locally (127.0.0.1) and on GitHub Pages (subpath) without edits.
-   - Leaves bg-ticker.js and bg-bubbles.js completely unchanged.
+   - Every background exposes a destroy hook for reload-free navigation.
    ========================================================================== */
 
 (function () {
@@ -51,19 +52,38 @@
     if (reducedMotion.matches) {
       window.__tickerBackground?.destroy();
       window.__bubblesBackground?.destroy();
+      window.__orbitalBackground?.destroy();
+      window.__carrierBackground?.destroy();
       return;
     }
 
     const slug = lastSegment().toLowerCase();
-    const useBubbles = slug === 'projects' || slug === 'engineering' || slug === 'resume';
+    const useOrbit = slug === 'projects' || slug === 'engineering';
+    const useCarrier = slug === 'resume';
 
-    if (useBubbles) {
+    if (useOrbit) {
       window.__tickerBackground?.destroy();
+      window.__bubblesBackground?.destroy();
+      window.__carrierBackground?.destroy();
       removeScript('ticker');
-      if (!document.getElementById('bg-bubbles')) inject('bg-bubbles.js', 'bubbles');
+      removeScript('bubbles');
+      removeScript('carrier');
+      if (!document.getElementById('orbital-world')) inject('bg-orbital.js', 'orbital');
+    } else if (useCarrier) {
+      window.__tickerBackground?.destroy();
+      window.__bubblesBackground?.destroy();
+      window.__orbitalBackground?.destroy();
+      removeScript('ticker');
+      removeScript('bubbles');
+      removeScript('orbital');
+      if (!document.getElementById('carrier-world')) inject('bg-carrier.js', 'carrier');
     } else {
       window.__bubblesBackground?.destroy();
+      window.__orbitalBackground?.destroy();
+      window.__carrierBackground?.destroy();
       removeScript('bubbles');
+      removeScript('orbital');
+      removeScript('carrier');
       if (!document.getElementById('ticker-bg')) inject('bg-ticker.js', 'ticker');
     }
   }

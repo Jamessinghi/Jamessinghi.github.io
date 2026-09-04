@@ -2,11 +2,20 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    
+
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
-      
+
         <meta name="description" content="Discover my portfolio, current projects, Achievements, Career Progression, Interests">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Business Projects — James Singhi">
+        <meta property="og:description" content="Trading systems, financial tools and live ventures in an interactive project world.">
+        <meta property="og:url" content="https://jamessinghi.github.io/projects/">
+        <meta property="og:image" content="https://jamessinghi.github.io/assets/images/og-portfolio.png">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Business Projects — James Singhi">
+        <meta name="twitter:description" content="Trading systems, financial tools and live ventures in an interactive project world.">
+        <meta name="twitter:image" content="https://jamessinghi.github.io/assets/images/og-portfolio.png">
       
       
         <meta name="author" content="James Singhi">
@@ -56,6 +65,8 @@
     
       <link rel="stylesheet" href="../stylesheets/quant-card.css">
     
+      <link rel="stylesheet" href="../stylesheets/experience.css">
+
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -439,7 +450,7 @@
           
           
             <div class="md-content" data-md-component="content">
-              <article class="md-content__inner md-typeset">
+              <article class="md-content__inner md-typeset project-world-page">
                 
                   
 
@@ -448,9 +459,20 @@
   
 
 
-  <h1>Business Projects</h1>
+  <section class="project-world-hero" aria-labelledby="business-projects-title">
+    <p class="project-world-hero__eyebrow">INTERACTIVE PROJECT CONSTELLATION</p>
+    <h1 id="business-projects-title">Ideas with<br><em>real gravity.</em></h1>
+    <p>Move through a live field of products, models and ventures. Use <strong>A / D</strong> or the arrow keys to move the explorer, and <strong>Space</strong> to jump between worlds.</p>
+    <div class="project-world-hero__legend" aria-label="Project world controls">
+      <span><kbd>A</kbd><kbd>D</kbd> move</span>
+      <span><kbd>SPACE</kbd> jump</span>
+      <span><i></i> scroll to navigate</span>
+    </div>
+  </section>
 
-<div class="quant-card">
+  <h2 class="project-section-label">Business Projects</h2>
+
+<div class="quant-card project-module" data-orbit-index="01">
   <div class="quant-card__header">
     <div class="quant-card__kicker">PROJECT</div>
     <div class="quant-card__title">Discretionary Equity Trading System <span>(2025)</span></div>
@@ -474,7 +496,7 @@
     Structured trade log and methodology available upon professional request.
   </div>
 </div>
-<div class="arch-wrap">
+<div class="arch-wrap project-module" data-orbit-index="02">
 <div class="arch-title">System Architecture</div>
 <div class="arch-subtitle">Inputs → Execution Layer → Outputs</div>
 <div class="arch-caption">
@@ -513,7 +535,7 @@
         </div>
       </div>
     </div>
-<div class="dash-wrap" id="tradeDash">
+<div class="dash-wrap project-module" id="tradeDash" data-orbit-index="03">
  <div class="dash-header">
     <!-- LEFT: Title block -->
     <div class="dash-header__left">
@@ -583,7 +605,7 @@
     </div>
   </div>
 
-<div class="full-width-row">
+<div class="full-width-row project-module" data-orbit-index="04">
 
  <hr>
 
@@ -658,7 +680,7 @@
 </div>
 
 <p><br></p>
-<section class="stockviz-wrap" id="stockViz">
+<section class="stockviz-wrap project-module" id="stockViz" data-orbit-index="05">
   <div class="stockviz-card">
     <div class="stockviz-header">
       <h2>Stock Projection (5Y History + 5Y Forecast)</h2>
@@ -721,7 +743,7 @@
 </div>
 </section>
 
-<section class="venture-wrap" aria-labelledby="drone-business-title">
+<section class="venture-wrap project-module" aria-labelledby="drone-business-title" data-orbit-index="06">
   <div class="venture-card">
     <header class="venture-header">
       <div class="venture-kicker">PROJECT</div>
@@ -772,7 +794,7 @@
   </div>
 </section>
 
-<section class="venture-wrap" aria-labelledby="valuation-engine-title">
+<section class="venture-wrap project-module" aria-labelledby="valuation-engine-title" data-orbit-index="07">
   <div class="venture-card">
     <header class="venture-header">
       <div class="venture-kicker">PROJECT</div>
@@ -917,6 +939,8 @@
       
         <script src="../javascripts/header-skin.js"></script>
       
+        <script src="../javascripts/experience.js"></script>
+
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       
         <script src="../javascripts/trading-dashboard.js"></script>

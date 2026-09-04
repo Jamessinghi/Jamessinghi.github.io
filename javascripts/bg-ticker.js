@@ -21,7 +21,7 @@
    4. On completion a website-preview bubble appears (screenshot via Microlink,
       falling back to thum.io, then a text card). The bubble latches in place,
       can be moused onto, and opens the company site in a new tab on click.
-      Ticker→website map lives in SITES; data here is SIMULATED (not live yet).
+      Ticker→website map lives in SITES; prices come from the hourly quote file.
 
    Readability: the content cover repaints behind the headline/intro so text
    stays legible over the moving tape.
@@ -102,7 +102,7 @@
   const SHADOW_COLOR = 'transparent';
   const SHADOW_BLUR  = 0;
 
-  // Stocks to simulate
+  // Stocks supplied by the hourly Twelve Data refresh (with local fallbacks)
   const TICKERS = ['AAPL','MSFT','NVDA','GOOGL','AMZN','TSLA','META','AMD'];
 
   // Company websites shown in the hover preview bubble.
@@ -188,16 +188,11 @@
   let hoveringPreview = false;   // is the cursor over the bubble itself
   let previewIdleStart = 0;      // performance.now() since leaving quote + bubble
 
-  // ---------- Stock price simulation ----------------------------------------
+  // ---------- Stock quote fallbacks -----------------------------------------
   function seedPrice(sym) {
     const base = { AAPL:190, MSFT:420, NVDA:820, GOOGL:155, AMZN:175, TSLA:210, META:500, AMD:155 };
     return (base[sym] || 100) + Math.random() * 2 - 1;
   }
-  function stepPrice(p) {
-    const step = (Math.random() - 0.5) * (Math.random() < 0.9 ? 0.8 : 3.2);
-    return Math.max(1, p + step);
-  }
-
   function buildStockSegments() {
     const segs = [];
 
@@ -777,8 +772,8 @@
       showQuoteTimestamp(quotesMeta.updated_at_utc);
 
       // Support BOTH formats:
-      // 1) New format (current): { "AAPL": 255.78, ... }
-      // 2) Old format: { "AAPL": { "price": 260.615, "prev_close": 255.41 }, ... }
+      // 1) Compact format: { "AAPL": 255.78, ... }
+      // 2) Current format: { "AAPL": { "price": 260.615, "prev_close": 255.41 }, ... }
       stock = TICKERS.map(sym => {
         const q = quotes[sym];
 
@@ -786,10 +781,10 @@
         let prevClose = NaN;
 
         if (typeof q === 'number') {
-          // New format: number is the price
+          // Compact format: number is the price
           price = Number(q);
         } else {
-          // Old format: object with price/prev_close
+          // Current format: object with price/prev_close
           price = Number(q?.price);
           prevClose = Number(q?.prev_close);
         }

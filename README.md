@@ -39,9 +39,11 @@ No application server, database, package installation, or compilation step is re
 
 - Responsive portfolio navigation and search, including Engineering and Business project categories
 - Persistent client-side app shell with prefetched, reload-free tab navigation
+- Cinematic desktop power-on sequence that zooms through the monitor into Home
 - Sticky two-row header that remains visible while scrolling
-- Animated stock-ticker background on the Home and Contact pages
-- Animated bubble background on the Business Projects, Engineering Projects, and Resume pages
+- Animated real-quote stock-ticker background on the Home and Contact pages
+- Pseudo-3D orbital project world with keyboard and touch explorer controls
+- Scroll-driven aircraft-carrier launch behind an interactive resume timeline
 - Trading-performance metrics, charts, filters, and trade table
 - Amortisation calculator
 - Stock visualization controls
@@ -72,15 +74,15 @@ deployed application and its GitHub repository. The iframe is supplementary;
 all project information and destinations remain accessible if embedding is
 unavailable.
 
-The page-aware background loader chooses an animation based on the current route:
+The page-aware background loader chooses an animation based on the current route and destroys the previous canvas cleanly during reload-free navigation. Project visitors can use `A`/`D` or the arrow keys to move the explorer and `Space` to jump; equivalent touch controls appear on small screens. Resume scroll position drives the carrier launch sequence.
 
 | Page | Background |
 | --- | --- |
 | Home | Stock ticker canvas |
 | Contact | Stock ticker canvas |
-| Business Projects | SVG bubbles |
-| Engineering Projects | SVG bubbles |
-| Resume | SVG bubbles |
+| Business Projects | Interactive orbital canvas |
+| Engineering Projects | Interactive orbital canvas |
+| Resume | Aircraft-carrier flight-deck canvas |
 
 ## Repository structure
 
@@ -104,13 +106,16 @@ The page-aware background loader chooses an animation based on the current route
 │   ├── bg-loader.js               # Selects the background for each page
 │   ├── app-shell.js               # Reload-free navigation and page prefetching
 │   ├── bg-ticker.js               # Animated stock ticker canvas
-│   ├── bg-bubbles.js              # Animated SVG bubble field
+│   ├── bg-orbital.js              # Project spheres and controllable explorer
+│   ├── bg-carrier.js              # Scroll-controlled resume flight deck
 │   ├── header-skin.js             # Page-specific header appearance
+│   ├── experience.js              # Boot sequence, route state, reveals and tilt
 │   ├── trading-dashboard.js       # Trading metrics, filters, and charts
 │   ├── amortisation.js            # Amortisation calculator
 │   └── stockviz.js                # Stock visualization behavior
 ├── stylesheets/
 │   ├── extra.css                  # Navigation, page, and background styling
+│   ├── experience.css             # Cinematic page and interaction layer
 │   └── quant-card.css             # Project cards, dashboards, and calculators
 ├── search/                        # Generated search index
 ├── sitemap.xml                    # Search-engine sitemap
