@@ -352,6 +352,22 @@ body.header-skin--image::before {
 body.header-skin--green { --header-skin-image: url("../assets/header-bar-green.png"); }
 body.header-skin--black { --header-skin-image: url("../assets/header-bar-black.png"); }
 
+/* Projects and Resume expose their animated scene beneath both menu rows. */
+body.transparent-header::before {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+body.transparent-header .md-header,
+body.transparent-header .md-tabs {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
 /* =========================
    GLASS (Home + Contact only)
    ========================= */

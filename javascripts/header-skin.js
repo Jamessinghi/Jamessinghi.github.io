@@ -13,19 +13,23 @@
       "header-skin--image",
       "header-skin--green",
       "header-skin--black",
-      "glass-header"
+      "glass-header",
+      "transparent-header"
     );
 
     const slug = lastSegment().toLowerCase();
 
     const GREEN_GLASS = new Set(["", "index", "contact"]); // Home + Contact
-    const BLACK_PNG   = new Set(["projects", "engineering", "resume"]); // Project pages + Resume
+    const TRANSPARENT = new Set(["projects", "resume"]); // Let each interactive world continue behind navigation
+    const BLACK_PNG   = new Set(["engineering"]);
 
     if (GREEN_GLASS.has(slug)) {
       // Home + Contact: GLASS only (no PNG strip)
       body.classList.add("header-skin--green", "glass-header");
+    } else if (TRANSPARENT.has(slug)) {
+      body.classList.add("transparent-header");
     } else if (BLACK_PNG.has(slug)) {
-      // Projects + Resume: keep PNG strip
+      // Engineering pages keep the neutral PNG strip
       body.classList.add("header-skin--image", "header-skin--black");
     } else {
       // default behavior (pick one)
