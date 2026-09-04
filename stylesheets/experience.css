@@ -668,11 +668,11 @@ body.boot-locked {
 .md-typeset .home-hero h1 {
   margin: 0;
   color: #f1fff7 !important;
-  font-family: var(--experience-display);
-  font-size: clamp(2.65rem, 6.5vw, 5rem);
-  font-weight: 850;
-  letter-spacing: -.07em;
-  line-height: .91;
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(2.45rem, 5.4vw, 4.35rem);
+  font-weight: 700;
+  letter-spacing: -.045em;
+  line-height: .96;
   text-align: left;
 }
 
@@ -682,6 +682,10 @@ body.boot-locked {
   color: transparent;
   font-style: normal;
   -webkit-text-stroke: 1px rgba(189, 255, 220, .62);
+}
+
+.home-hero h1 em {
+  -webkit-text-stroke-width: 1.4px;
 }
 
 .home-hero__lead {
