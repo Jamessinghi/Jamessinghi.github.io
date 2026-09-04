@@ -639,14 +639,31 @@ body.boot-locked {
 }
 
 .md-typeset .home-hero h1 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
   margin: 0;
   color: #f1fff7 !important;
   font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
-  font-size: clamp(2.45rem, 5.4vw, 4.35rem);
-  font-weight: 700;
-  letter-spacing: -.045em;
-  line-height: .96;
   text-align: left;
+}
+
+.home-hero__welcome {
+  color: rgba(194, 231, 211, .66);
+  font-family: var(--experience-mono);
+  font-size: clamp(.68rem, 1.15vw, .82rem);
+  font-weight: 700;
+  letter-spacing: .24em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.home-hero__title {
+  font-size: clamp(2.8rem, 5.6vw, 4.6rem);
+  font-weight: 700;
+  letter-spacing: -.055em;
+  line-height: .92;
 }
 
 .home-hero h1 em,
@@ -658,7 +675,14 @@ body.boot-locked {
 }
 
 .home-hero h1 em {
-  -webkit-text-stroke-width: 1.4px;
+  color: var(--experience-green);
+  background: linear-gradient(135deg, #dffff0 0%, var(--experience-green) 78%);
+  font-style: normal;
+  text-shadow: 0 0 28px rgba(101, 255, 180, .14);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0;
 }
 
 .home-hero__lead {
