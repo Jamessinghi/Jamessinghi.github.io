@@ -117,7 +117,7 @@
   const LOAD_SECS = 0.65;   // brief dwell; the tape continues moving throughout
 
   // Fade-under-content configuration
-  const ENABLE_FADE_COVER = true;      // draw a cover over content instead of cutting a hole
+  const ENABLE_FADE_COVER = false;     // the foreground hero card now provides its own contrast
   const RADIUS_PX   = 28;              // softer rounded corners for the content cover
   const FEATHER_OPACITY = 1;           // fully isolate content from moving ticker pixels
 
