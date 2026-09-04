@@ -815,42 +815,6 @@ body.boot-locked {
 .market-console__readout dt { color: rgba(225,245,234,.34); }
 .market-console__readout dd { margin: 0; color: rgba(228,255,240,.78); }
 
-.home-proof {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  margin-top: 18px;
-  overflow: hidden;
-  background: rgba(116, 255, 182, .09);
-  border: 1px solid rgba(154, 255, 203, .1);
-  border-radius: 16px;
-  backdrop-filter: blur(16px);
-}
-
-.home-proof > div {
-  display: flex;
-  min-height: 78px;
-  flex-direction: column;
-  justify-content: center;
-  padding: 13px 18px;
-  background: rgba(2, 12, 7, .78);
-}
-
-.home-proof strong {
-  color: #effff6;
-  font-family: var(--experience-display);
-  font-size: 1.45rem;
-  line-height: 1;
-}
-
-.home-proof span {
-  margin-top: 6px;
-  color: rgba(214,242,226,.43);
-  font-family: var(--experience-mono);
-  font-size: 8px;
-  letter-spacing: .12em;
-}
-
 .home-scroll-cue {
   display: flex;
   align-items: center;
@@ -871,13 +835,11 @@ body.boot-locked {
 
 body.site-arriving .home-hero__copy,
 body.site-arriving .market-console,
-body.site-arriving .home-proof,
 body.site-arriving .home-hero__signal {
   animation: home-arrive 900ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 body.site-arriving .market-console { animation-delay: 90ms; }
-body.site-arriving .home-proof { animation-delay: 160ms; }
 
 @keyframes radar-spin { to { transform: rotate(360deg); } }
 @keyframes node-pulse { 50% { opacity: .35; transform: scale(.72); } }
@@ -1519,7 +1481,6 @@ body.route-projects .md-button--primary {
   .home-hero__grid { grid-template-columns: 1fr; }
   .market-console { display: none; }
   .home-hero { min-height: auto; padding-top: 54px; }
-  .home-proof { grid-template-columns: 1fr 1fr; }
   .project-world-hero,
   .resume-flight-hero { min-height: calc(100svh - 100px); padding-right: 10px; padding-left: 10px; }
 
@@ -1566,7 +1527,6 @@ body.route-projects .md-button--primary {
   .home-hero__copy { padding: 24px 20px; border-radius: 21px; }
   .home-hero__actions { align-items: stretch; flex-direction: column; }
   .experience-button { width: 100%; }
-  .home-proof > div { min-height: 66px; padding: 11px 13px; }
   .signal-code { display: none; }
   .project-world-hero__legend { display: none; }
   .project-module::before { top: 11px; right: 12px; }
@@ -1584,7 +1544,6 @@ body.route-projects .md-button--primary {
   .boot-instruction i,
   body.site-arriving .home-hero__copy,
   body.site-arriving .market-console,
-  body.site-arriving .home-proof,
   body.site-arriving .home-hero__signal {
     animation: none !important;
   }
