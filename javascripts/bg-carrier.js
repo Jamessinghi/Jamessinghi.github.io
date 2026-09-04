@@ -1,4 +1,11 @@
-/* Photoreal, scroll-driven aircraft-carrier world for the resume route. */
+/**
+ * Resume aircraft-carrier background.
+ *
+ * Builds the full-screen carrier canvas, composites the generated storm assets,
+ * and maps page scroll to launch-deck camera movement and atmospheric effects.
+ * The module owns its cleanup lifecycle so MkDocs instant navigation can remove
+ * the scene cleanly when the visitor leaves the Resume route.
+ */
 (function () {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (document.getElementById('carrier-world')) return;

@@ -1,8 +1,11 @@
-/* docs/javascripts/header-skin.js
-   Per-page header skin that survives MkDocs Material "instant loading".
-   - Adds classes to <body>, not <html>.
-   - Re-runs on each SPA navigation via document$.subscribe().
-*/
+/**
+ * Route-aware navigation skin.
+ *
+ * Adds presentation classes to <body> for the current page and reapplies them
+ * after MkDocs Material's instant-navigation swaps. Keeping route detection in
+ * this small module lets the shared CSS style each page without duplicating its
+ * generated header markup.
+ */
 (function () {
   function applySkin() {
     const body = document.body;

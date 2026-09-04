@@ -1,4 +1,9 @@
-/* === Custom styling for James Singhi Personal Website === */
+/* ===========================================================================
+   JAMES SINGHI / BASE THEME OVERRIDES
+   Purpose: contains shared MkDocs Material overrides and legacy component
+   styling used across the generated portfolio pages. Cinematic, route-specific
+   presentation belongs in experience.css; this file provides the base layer.
+   ========================================================================== */
 
 /* Make headers slightly bolder */
 .md-typeset h1 {

@@ -1,6 +1,9 @@
 /* ========================================================================== 
    JAMES SINGHI / PORTFOLIO EXPERIENCE LAYER
-   A cinematic interaction layer built on top of the existing MkDocs shell.
+   Purpose: owns the cinematic layouts, route-specific presentation, responsive
+   states and motion used by the Home, Projects, Resume and Contact experiences.
+   Integration: loaded after the base MkDocs theme so these rules can enhance
+   the generated markup without modifying the framework's core styles.
    ========================================================================== */
 
 :root {
