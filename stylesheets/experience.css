@@ -133,8 +133,12 @@ body.route-contact .md-tabs__link {
 /* Contact keeps the ticker world, with one focused green glass surface. */
 body.route-contact .md-content__inner {
   position: relative;
+  display: grid;
   box-sizing: border-box;
-  max-width: 760px;
+  max-width: 860px;
+  grid-template-columns: minmax(210px, .72fr) minmax(0, 1.28fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 62px);
   margin-top: clamp(72px, 13vh, 132px);
   padding: clamp(30px, 5vw, 54px) !important;
   overflow: hidden;
@@ -149,33 +153,47 @@ body.route-contact .md-content__inner {
     0 0 52px rgba(35, 226, 128, .06) !important;
   -webkit-backdrop-filter: blur(22px) saturate(1.12);
   backdrop-filter: blur(22px) saturate(1.12);
+  isolation: isolate;
 }
 
 body.route-contact .md-content__inner::before {
   content: "" !important;
   position: absolute;
-  top: -1px;
-  left: 38px;
+  inset: -1px;
   display: block !important;
-  width: 112px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--experience-green), transparent) !important;
-  box-shadow: 0 0 18px rgba(101, 255, 180, .75) !important;
+  box-sizing: border-box;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--hero-edge-angle),
+    transparent 0deg 340deg,
+    rgba(101, 255, 180, .12) 344deg,
+    var(--experience-green) 352deg,
+    rgba(101, 255, 180, .18) 358deg,
+    transparent 360deg
+  ) !important;
+  filter: drop-shadow(0 0 6px rgba(101, 255, 180, .75)) !important;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: hero-edge-scan 7s linear infinite;
 }
 
 body.route-contact .md-content__inner > h1 {
-  margin-top: 0;
+  margin: 0;
   color: #effff6 !important;
   font-family: var(--experience-display);
-  font-size: clamp(2rem, 5vw, 3.4rem);
-  letter-spacing: -.05em;
+  font-size: clamp(2.7rem, 6vw, 4.8rem);
+  letter-spacing: -.018em;
+  line-height: .92;
   text-align: left;
 }
 
 body.route-contact .md-content__inner > ul {
   display: grid;
   gap: 15px;
-  margin: 26px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -1643,6 +1661,8 @@ body.route-projects .md-button--primary {
 
   .home-hero__copy { padding: 24px 20px; border-radius: 21px; }
   body.route-contact .md-content__inner {
+    grid-template-columns: 1fr;
+    gap: 24px;
     margin-top: 48px;
     padding: 26px 20px !important;
     border-radius: 21px;
@@ -1665,6 +1685,7 @@ body.route-projects .md-button--primary {
   .radar-node,
   .boot-instruction i,
   .home-hero__copy::before,
+  body.route-contact .md-content__inner::before,
   body.site-arriving .home-hero__copy,
   body.site-arriving .market-console,
   body.site-arriving .home-hero__signal {
